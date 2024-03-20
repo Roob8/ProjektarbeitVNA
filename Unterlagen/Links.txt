@@ -1,0 +1,13 @@
+2024-03-13
+
+Mini-Circuits Info-Seite zum UVNA-63
+https://www.minicircuits.com/WebStore/uvna_63.html
+
+VNA-Files nach Installation unter
+C:\Program Files\Vayyar\VNAKit
+
+EDA-Forum:
+https://www.edaboard.com/threads/uvna-63.404497/
+
+YouTube-Intro
+https://www.youtube.com/watch?v=jM0QumPtv7E
