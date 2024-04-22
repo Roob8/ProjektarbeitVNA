@@ -7,8 +7,18 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import skrf as rf
-from vnakit_ex import getSettingsStr
-from vnakit_ex.hidden import *
+
+import_from_src = True
+if import_from_src:
+    # To develop using the source code, import from: "utils.py" and "hidden.py"
+    from utils import getSettingsStr
+    from hidden import ab2S, measure2Port, userMsg
+else:
+    # To develop using the built-in library, import from the "vnakit_ex" module instead
+    from vnakit_ex import getSettingsStr
+    from vnakit_ex.hidden import ab2S, measure2Port, userMsg
+
+
 import vnakit
 
 output_folder = 'output'
@@ -45,15 +55,5 @@ print('Recording...',end='')
 (rec_tx1,rec_tx2) = measure2Port(vnakit,settings,ports)
 print('Done.\n')
 
-# converting a/b waves to S-parameters
-S_param_meas = ab2S(rec_tx1,rec_tx2,ports)
-
-
-# a plot comparing the raw uncorrected measurement
-# to the corrected S-paramter measurement in Log-Magnitude
-fig, axes = plt.subplots(2,1)
-DUT = rf.Network(s=S_param_meas,f=freq_vec,z0=50,f_unit='MHz')
-DUT.plot_s_db(ax=axes[0])
-DUT.plot_s_deg_unwrap(ax=axes[1])
-axes[0].set_title('Uncalibrated S-Parameter Measurement')
-plt.show()
+S_param = ab2S(rec_tx1,rec_tx2,ports)
+print(test)

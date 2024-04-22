@@ -7,9 +7,14 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import skrf as rf
-from vnakit_ex import getSettingsStr
-from vnakit_ex.hidden import *
+import pickle
+
+from utils import getSettingsStr
+from hidden import ab2S, measure2Port, userMsg
+
 import vnakit
+
+from Funktionen.S_to_excel import SParam_to_ecxel
 
 output_folder = 'output'
 print('\n------------ DEMO: Mini-Circuits Vayyar VNA kit ------------\n')
@@ -24,9 +29,9 @@ vnakit.Init()
 
 # VNA Kit settings
 settings = vnakit.RecordingSettings(
-    vnakit.FrequencyRange(2400, 2600, 1001), # fmin,fmax,num_points
+    vnakit.FrequencyRange(2400, 2800, 1001), # fmin,fmax,num_points
     10, # RBW (in KHz)
-    -10, # output power (dbM)
+    0, # output power (dbM)
     ports['Tx1'], # transmitter port
     vnakit.VNAKIT_MODE_TWO_PORTS
 )
@@ -48,6 +53,7 @@ print('Done.\n')
 # converting a/b waves to S-parameters
 S_param_meas = ab2S(rec_tx1,rec_tx2,ports)
 
+SParam_to_ecxel(settings,freq_vec,S_param_meas)
 
 # a plot comparing the raw uncorrected measurement
 # to the corrected S-paramter measurement in Log-Magnitude
@@ -57,3 +63,5 @@ DUT.plot_s_db(ax=axes[0])
 DUT.plot_s_deg_unwrap(ax=axes[1])
 axes[0].set_title('Uncalibrated S-Parameter Measurement')
 plt.show()
+
+

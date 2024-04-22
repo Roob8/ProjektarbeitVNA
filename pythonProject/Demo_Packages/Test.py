@@ -1,3 +1,4 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import skrf as rf
@@ -5,15 +6,29 @@ from vnakit_ex import getSettingsStr
 from vnakit_ex.hidden import *
 import vnakit
 
-num_points = 1001
-start_freq = 2500
-end_freq = 3500
+f_start = 2000
+f_stop = 2600
+num_p = 601
 
-freq_array = np.arange(start_freq, end_freq, ((end_freq - start_freq)/(num_points-1))).tolist()
-freq_array.append(end_freq)
+RBW = 1
+power = -10
+output_port = 'Tx1'
 
-print(freq_array)
 
-S3P = readSnP(r'C:\Users\RoobFlorian\Downloads\ZHDC-16-63-S+_S3P\ZHDC-16-63-S+_AP160930_110216_UNIT-2.s3p', freq_desired=freq_array, kind='dB')
+ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
 
-print(S3P)
+portNumber = ports[output_port]
+
+vnakit.Init()
+
+settings = vnakit.RecordingSettings(vnakit.FrequencyRange(f_start, f_stop, num_p), RBW, power, portNumber, vnakit.VNAKIT_MODE_TWO_PORTS)
+
+vnakit.ApplySettings(settings)
+
+settings_str = getSettingsStr(settings)
+print(settings_str)
+
+(rec_tx1,rec_tx2) = measure2Port(vnakit,settings,ports)
+
+print(rec_tx1)
+print(rec_tx2)
