@@ -29,16 +29,16 @@ def SParam_to_ecxel(settings,frequency,s_params):
 
     for x in range(len(freq)):
         S11_Betrag.append(20*math.log10(np.abs(s_params[x][0][0])))
-        S11_Phase.append(np.angle(s_params[x][0][0]))
+        S11_Phase.append(np.angle(s_params[x][0][0], deg=True))
 
         S21_Betrag.append(20*math.log10(np.abs(s_params[x][1][0])))
-        S21_Phase.append(np.angle(s_params[x][1][0]))
+        S21_Phase.append(np.angle(s_params[x][1][0], deg=True))
 
         S12_Betrag.append(20 * math.log10(np.abs(s_params[x][0][1])))
-        S12_Phase.append(np.angle(s_params[x][0][1]))
+        S12_Phase.append(np.angle(s_params[x][0][1], deg=True))
 
         S22_Betrag.append(20 * math.log10(np.abs(s_params[x][1][1])))
-        S22_Phase.append(np.angle(s_params[x][1][1]))
+        S22_Phase.append(np.angle(s_params[x][1][1], deg=True))
 
     data = pd.DataFrame(data={"Setup": setup, "Frequenz": freq,
                               "S11 Betrag": S11_Betrag, "S11 Phase": S11_Phase,
