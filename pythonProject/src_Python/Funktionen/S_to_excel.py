@@ -23,6 +23,7 @@ def SParam_to_ecxel(settings,frequency,s_params):
     setup.append("Anzahl der Messpunkte: " + str(settings.freqRange.numFreqPoints))
     setup.append("RBW: " + str(settings.rbw_khz) + " kHz")
 
+    freq = np.array(vnakit.GetFreqVector_MHz())
     for x in range(len(freq)-5):
         setup.append("")
 

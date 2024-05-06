@@ -29,9 +29,9 @@ vnakit.Init()
 
 # VNA Kit settings
 settings = vnakit.RecordingSettings(
-    vnakit.FrequencyRange(2400, 2800, 1001), # fmin,fmax,num_points
+    vnakit.FrequencyRange(100, 6000, 1001), # fmin,fmax,num_points
     10, # RBW (in KHz)
-    0, # output power (dbM)
+    -20, # output power (dbM)
     ports['Tx1'], # transmitter port
     vnakit.VNAKIT_MODE_TWO_PORTS
 )
@@ -51,14 +51,14 @@ print('Recording...',end='')
 print('Done.\n')
 
 # converting a/b waves to S-parameters
-S_param_meas = ab2S(rec_tx1,rec_tx2,ports)
+S_param_meas = ab2S(rec_tx1, rec_tx2, ports)
 
-SParam_to_ecxel(settings,freq_vec,S_param_meas)
+SParam_to_ecxel(settings, freq_vec, S_param_meas)
 
 # a plot comparing the raw uncorrected measurement
 # to the corrected S-paramter measurement in Log-Magnitude
 fig, axes = plt.subplots(2,1)
-DUT = rf.Network(s=S_param_meas,f=freq_vec,z0=50,f_unit='MHz')
+DUT = rf.Network(s=S_param_meas, f=freq_vec, z0=50, f_unit='MHz')
 DUT.plot_s_db(ax=axes[0])
 DUT.plot_s_deg_unwrap(ax=axes[1])
 axes[0].set_title('Uncalibrated S-Parameter Measurement')

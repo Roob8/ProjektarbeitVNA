@@ -7,6 +7,7 @@ calibrated measurements side by side and outputs SnP files: 'DUT.S2P' and
 respectively. This script is a good reference for new UVNA applications.
 """
 import numpy as np
+from Funktionen.store_refl_coef import store_refl_coef
 
 import_from_src = True
 if import_from_src:
@@ -67,7 +68,7 @@ def main():
     # now enter a loop that takes a measurement and plots the results
     while(1):
         # raw measurement of the DUT
-        userMsg('>> Measure DUT:')
+        userMsg('>> Measure DUT (exit with q):')
         print('Recording...',end='')
         (rec_tx1,rec_tx2) = measure2Port(vnakit,settings,ports)
         print('Done.\n')

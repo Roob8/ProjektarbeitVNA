@@ -4,6 +4,8 @@ hidden-source helper functions for UVNA-63
 """
 from __future__ import print_function
 import sys
+from Funktionen.store_refl_coef import store_refl_coef
+
 #try if not aready imported
 if 'matplotlib' not in sys.modules:
     import matplotlib
@@ -406,7 +408,7 @@ def prompt1PortSOL(vnakit,settings,ports,tx):
     Gm[:,2] = prompt1PortMeasure(vnakit,settings,ports,tx,'LOAD')
     return Gm
 
-def prompt2PortSOLT(vnakit,settings,ports,isolation=False,sw_corr=True):
+def prompt2PortSOLT(vnakit, settings, ports, isolation=False, sw_corr=True):
     """
     Uses prompt1PortSOL to get SOL measurements at each port, an additional
     thru measurement, and an optional isolation measurement
@@ -426,6 +428,7 @@ def prompt2PortSOLT(vnakit,settings,ports,isolation=False,sw_corr=True):
     print('-- Switch to Port-2 --\n')
     Gm2 = prompt1PortSOL(vnakit,settings,ports,ports['Tx2'])
     Tm = prompt2PortMeasure(vnakit,settings,ports,'THRU',sw_corr)
+    store_refl_coef(settings, Gm1, Gm2, Tm)
     if isolation:
         Im = prompt2PortMeasure(vnakit,settings,ports,'ISOLATION',sw_corr)
         return (Gm1,Gm2,Tm,Im)

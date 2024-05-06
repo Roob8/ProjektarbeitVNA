@@ -6,8 +6,6 @@ def store_measurment(settings,frequency,s_params):
     import datetime as dt
     import os
 
-
-
     setup = []
     freq = []
     S11_Betrag = []
