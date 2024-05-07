@@ -197,35 +197,10 @@ def output_folder_button_clicked():
 
 def save_button_clicked():
     global folder_path
-    # global S_params
+    global S_params
+    global settings
 
-    # Dateipfad zur S-Parameter-Datei
-    load    = r"C:\Users\leix\Desktop\HTW Dresden\SS24\Projektarbeit Vector-Network-Analyzer\Github_Roob\ProjektarbeitVNA\pythonProject\src_Python\stds\load.s1p"
-    open    = r"C:\Users\leix\Desktop\HTW Dresden\SS24\Projektarbeit Vector-Network-Analyzer\Github_Roob\ProjektarbeitVNA\pythonProject\src_Python\stds\open.s1p"
-    short   = r"C:\Users\leix\Desktop\HTW Dresden\SS24\Projektarbeit Vector-Network-Analyzer\Github_Roob\ProjektarbeitVNA\pythonProject\src_Python\stds\short.s1p"
-    # thru    = r"C:\Users\leix\Desktop\HTW Dresden\SS24\Projektarbeit Vector-Network-Analyzer\Github_Roob\ProjektarbeitVNA\pythonProject\src_Python\stds\thru.s1p"
-
-    # Einlesen der S-Parameter-Datei
-    df_load = pd.read_csv(load, skiprows=5, delimiter="\t", header=None,
-                     names=['Frequency', 'S11_real', 'S11_imaginary', 'S21_real', 'S21_imaginary', 'S12_real',
-                            'S12_imaginary', 'S22_real', 'S22_imaginary'])
-
-    df_open = pd.read_csv(open, skiprows=5, delimiter="\t", header=None,
-                          names=['Frequency', 'S11_real', 'S11_imaginary', 'S21_real', 'S21_imaginary', 'S12_real',
-                                 'S12_imaginary', 'S22_real', 'S22_imaginary'])
-
-    df_short = pd.read_csv(short, skiprows=5, delimiter="\t", header=None,
-                          names=['Frequency', 'S11_real', 'S11_imaginary', 'S21_real', 'S21_imaginary', 'S12_real',
-                                 'S12_imaginary', 'S22_real', 'S22_imaginary'])
-    '''
-    df_thru = pd.read_csv(thru, skiprows=5, delimiter="\t", header=None,
-                          names=['Frequency', 'S11_real', 'S11_imaginary', 'S21_real', 'S21_imaginary', 'S12_real',
-                                 'S12_imaginary', 'S22_real', 'S22_imaginary'])
-    '''
-    # in demo_full_2_port.py wird settings_str = getSettingsStr(settings) verwendet
-    input_settings = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input, power_input)
-    S_params = [df_load, df_open, df_short]
-    save_measurements(input_settings, S_params, folder_path, name_input.get())
+    save_measurements(settings, S_params, folder_path, name_input.get())
 
 
 def get_path_open():
