@@ -1,11 +1,20 @@
-def store_measurment(settings,frequency,s_params):
+def save_measurments(input_settings, S_params, folder_path, file_name ):
     import pandas as pd
     import numpy as np
     import math
     from pathlib import Path
     import datetime as dt
     import os
+    """
+    Die SOLT-Kalibriermessung wird durch das Verwenden von gespeicherten Kalibrierdaten ersetzt.
+    input:
+        input_settings: List with start, stop, NOP, RBW, power
+        S_params: S-parameter from measurement. Dictionary, with a list of complex phasors for each port (1-6) in order OSLT
+        
+        folder_path: String with absolute path of filder
+    output:
 
+    """
     setup = []
     freq = []
     S11_Betrag = []

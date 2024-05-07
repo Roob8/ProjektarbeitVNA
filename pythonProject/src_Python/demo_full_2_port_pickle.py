@@ -6,7 +6,10 @@ calibrated measurements side by side and outputs SnP files: 'DUT.S2P' and
 'DUT_uncorrected.S2P' for the corrected and uncorrected S-Parameters
 respectively. This script is a good reference for new UVNA applications.
 """
-import numpy as npS
+import numpy as np
+from Funktionen.store_refl_coef import store_refl_coef
+import pickle
+import vnakit
 
 import_from_src = True
 if import_from_src:
@@ -20,7 +23,7 @@ else:
     from vnakit_ex.hidden import userMsg,readSnP,prompt2PortSOLT,get12TermModel,\
                                 measure2Port,ab2S,correct12Term,plotCompareDb,writeSnP
 
-import vnakit
+
 
 def main():
     print('\n------------ DEMO: Mini-Circuits Vayyar VNA kit ------------\n')
@@ -39,9 +42,19 @@ def main():
         ports['Tx1'], # transmitter port
         vnakit.VNAKIT_MODE_TWO_PORTS
     )
+
+    settings_path = r'Pickle\settings.pkl'      # Pfad zur Pickledatei
+    with open(settings_path, 'wb') as file:     # Variablen mit pickle speichern
+        pickle.dump(settings, file)
+
     vnakit.ApplySettings(settings)
     # actual frequency vector used by the board
     freq_vec = np.array(vnakit.GetFreqVector_MHz())
+
+    freq_vec_path = r'Pickle\freq_vec.pkl'     # Pfad zur Pickledatei
+    with open(freq_vec_path, 'wb') as file:     # Variablen mit pickle speichern
+        pickle.dump(freq_vec, file)
+
     print('The board is initialized with settings:\n')
     # gets a formatted string of the board's settings. See vnakit_ex/utils.py
     settings_str = getSettingsStr(settings)
@@ -52,12 +65,30 @@ def main():
     # puts the reflection coefficents of the SOL standards in single array.
     # Also interpolates in frequency. See vnakit_ex/utils.py
     Gamma_listed = loadGammaListed(sol_stds,freq_vec*1e6)
+
+    gamma_listed_path = r'Pickle\gamma_listed.pkl' # Pfad zur Pickledatei
+    with open(gamma_listed_path, 'wb') as file:         # Variablen mit pickle speichern
+        pickle.dump(Gamma_listed, file)
+
     # loads S-parameter data of the thru standard, interpolates frequency
     Thru_listed = readSnP('stds/thru.S2P',freq_desired=freq_vec*1e6)
     # prompts user for SOLT measurements and returns raw measured
     # SOLT reflection coefficents and S-parameters
     (Gamma_meas_p1,Gamma_meas_p2,Thru_meas) = \
         prompt2PortSOLT(vnakit,settings,ports,isolation=False)
+
+    gamma_meas_p1_pth = r'Pickle\gamma_meas_p1.pkl' # Pfad zur Pickledatei
+    with open(gamma_meas_p1_pth, 'wb') as file:         # Variablen mit pickle speichern
+        pickle.dump(Gamma_meas_p1, file)
+
+    gamma_meas_p2_pth = r'Pickle\gamma_meas_p2.pkl' # Pfad zur Pickledatei
+    with open(gamma_meas_p2_pth, 'wb') as file:         # Variablen mit pickle speichern
+        pickle.dump(Gamma_meas_p2, file)
+
+    thru_meas_pth = r'Pickle\thru_meas.pkl' # Pfad zur Pickledatei
+    with open(thru_meas_pth, 'wb') as file:         # Variablen mit pickle speichern
+        pickle.dump(Thru_meas, file)
+
     # constructs the 12-term model from the standards data and the data measured
     # from the prompt.
     print('Constructing 12-Term Error Model...')
@@ -70,6 +101,15 @@ def main():
         userMsg('>> Measure DUT (exit with q):')
         print('Recording...',end='')
         (rec_tx1,rec_tx2) = measure2Port(vnakit,settings,ports)
+
+        rec_tx1_pth = r'Pickle\rec_tx1.pkl'  # Pfad zur Pickledatei
+        with open(rec_tx1_pth, 'wb') as file:  # Variablen mit pickle speichern
+            pickle.dump(rec_tx1, file)
+
+        rec_tx2_pth = r'Pickle\rec_tx2.pkl'  # Pfad zur Pickledatei
+        with open(rec_tx2_pth, 'wb') as file:  # Variablen mit pickle speichern
+            pickle.dump(rec_tx2, file)
+
         print('Done.\n')
         # converting a/b waves to S-parameters
         S_param_meas = ab2S(rec_tx1,rec_tx2,ports)
