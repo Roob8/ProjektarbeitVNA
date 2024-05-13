@@ -3,6 +3,8 @@ from cosmetic_defs import *
 from tkinter import filedialog
 from Functions import *
 import pandas as pd
+import pickle
+import vnakit
 
 ########################################################################################################################
 global choosen_port  # Globale Variable ob single oder dual port
@@ -167,7 +169,12 @@ def ideal_clicked():
 
 
 def run_button_clicked():
-    global S_params
+    global S_param_kompl
+    global S_param_cor
+    global S_param_dB
+    global settings
+    global freq_vec
+    global ports
 
     output_folder_button.grid(row=12, column=1, sticky=center)
     output_folder_output.grid(row=12, column=2, sticky=center)
@@ -179,10 +186,12 @@ def run_button_clicked():
     cal_files = [open_s_param_A, short_s_param_A, load_s_param_A, open_s_param_B, short_s_param_B, load_s_param_B,
                  thru_s_param]
 
-    input_settings = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input, power_input)
-    choosen_port = "Tx1"
-    which_single_port = "Tx1"
-    S_params = run_measurement(input_settings, choosen_port, which_single_port, cal_files, cal_plot_check.get())
+    settings, freq_vec, ports = init(start_freq_input, end_freq_input, nop_input, rbw_input, power_input)
+
+    single_dual = 2
+    which_single_port = "Tx1"       # Text muss noch von GUI Eingabe übernommen werden
+
+    S_param_kompl, S_param_cor, S_param_dB = run_measurement(settings, single_dual, which_single_port, cal_files, ports, freq_vec)
 
 
 def output_folder_button_clicked():
@@ -196,12 +205,14 @@ def output_folder_button_clicked():
 
 
 def save_button_clicked():
+    global freq_vec
+    global S_param_kompl
+    global S_param_cor
     global folder_path
-    global S_params
-    global settings
 
-    save_measurements(settings, S_params, folder_path, name_input.get())
-
+    file_name = name_input.get()
+    # file_name = "Test"
+    save_measurements(freq_vec, S_param_kompl, S_param_cor, folder_path, file_name)
 
 def get_path_open():
     global open_s_param_A
@@ -428,12 +439,14 @@ start_freq_text = Label(root, text="Startfrequenz in MHz", font=text_normal)
 start_freq_text.grid(row=2, column=0, sticky=center)
 
 start_freq_input = Entry(root, font=text_normal, bd=bw)
+start_freq_input.insert(0,"100")
 start_freq_input.grid(row=2, column=1, sticky=center)
 
 end_freq_text = Label(root, text="Endfrequenz in MHz", font=text_normal)
 end_freq_text.grid(row=2, column=3, sticky=center)
 
 end_freq_input = Entry(root, font=text_normal, bd=bw)
+end_freq_input.insert(0,"6000")
 end_freq_input.grid(row=2, column=4, sticky=center)
 
 power_text = Label(root, text="Eingangsleistung in dBm", font=text_normal)
@@ -447,12 +460,14 @@ nop_text = Label(root, text="Anzahl der Messpunkte", font=text_normal)
 nop_text.grid(row=3, column=3, sticky=center)
 
 nop_input = Entry(root, font=text_normal, bd=bw)
+nop_input.insert(0,"1001")
 nop_input.grid(row=3, column=4, sticky=center)
 
 rbw_text = Label(root, text="RBW in kHz", font=text_normal)
 rbw_text.grid(row=4, column=0, sticky=center)
 
 rbw_input = Entry(root, font=text_normal, bd=bw)
+rbw_input.insert(0,"10")
 rbw_input.grid(row=4, column=1, sticky=center)
 
 portlist = Listbox(selectmode='single', height=2)
