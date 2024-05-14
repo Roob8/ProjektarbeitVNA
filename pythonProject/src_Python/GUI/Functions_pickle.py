@@ -1,11 +1,9 @@
 from tkinter import *
-import hidden
 import pickle
 import vnakit
 import numpy as np
 import hidden as hid
 import utils as ut
-from sKompl_2_sLog import sKompl_2_sLog
 
 def insert_blank_line(root, row, num_columns):
     blank_line = Label(root, text="")
@@ -131,6 +129,32 @@ def dual_measurement(vnakit, settings, ports, freq_vec):
 
     return hid.ab2S(rec_tx1, rec_tx2, ports) # converting a/b waves to S-parameter
 
+
+def sKompl_2_sLog(s_param_kompl, frequency):
+    setup = []
+    S11_Betrag = []
+    S11_Phase = []
+    S21_Betrag =[]
+    S21_Phase = []
+    S12_Betrag = []
+    S12_Phase = []
+    S22_Betrag = []
+    S22_Phase = []
+
+    for x in range(len(frequency)):
+        S11_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][0][0])))
+        S11_Phase.append(np.angle(s_param_kompl[x][0][0], deg=True))
+
+        S21_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][1][0])))
+        S21_Phase.append(np.angle(s_param_kompl[x][1][0], deg=True))
+
+        S12_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][0][1])))
+        S12_Phase.append(np.angle(s_param_kompl[x][0][1], deg=True))
+
+        S22_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][1][1])))
+        S22_Phase.append(np.angle(s_param_kompl[x][1][1], deg=True))
+
+    return S11_Betrag, S11_Phase, S21_Betrag, S21_Phase, S12_Betrag, S12_Phase, S22_Betrag, S22_Phase
 
 def load_sparam(input_setings, path):
     S_param = "Platzhalter"

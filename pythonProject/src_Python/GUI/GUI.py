@@ -1,9 +1,6 @@
 from cosmetic_defs import *
-
 from tkinter import filedialog
 from Functions import *
-import pandas as pd
-import pickle
 import vnakit
 
 ########################################################################################################################
@@ -17,7 +14,6 @@ global open_s_param_B
 global short_s_param_B
 global load_s_param_B
 global thru_s_param
-
 
 ########################################################################################################################
 
@@ -39,7 +35,7 @@ def get_ideal_s_params():
     thru_s_param = "ideale thru s params"
 
 
-def cal_buttom_clicked(port_variable, portlist):
+def cal_buttom_clicked(port_variable, portlist):    # @Florian: Welcher Button wird dort ausgewählt?
     global choosen_port
     global which_single_port
     portlist_index = portlist.curselection()
@@ -49,9 +45,10 @@ def cal_buttom_clicked(port_variable, portlist):
     own_meas.grid(row=7, column=0, sticky=center)
     s_meas.grid(row=7, column=2, sticky=center)
     ideal_meas.grid(row=7, column=4, sticky=center)
-
     checkbox_plot_cal.grid(row=9, column=columns - 1, sticky=right)
 
+    settings, freq_vec, ports = init(100, 1000, 11, 10, -10)
+    calibration(choosen_port, which_single_port, vnakit, settings, ports)
 
 def own_meas_clicked():
     path_open_output.config(state="normal")
@@ -175,6 +172,7 @@ def run_button_clicked():
     global settings
     global freq_vec
     global ports
+    global choosen_port
 
     output_folder_button.grid(row=12, column=1, sticky=center)
     output_folder_output.grid(row=12, column=2, sticky=center)
@@ -186,19 +184,17 @@ def run_button_clicked():
     cal_files = [open_s_param_A, short_s_param_A, load_s_param_A, open_s_param_B, short_s_param_B, load_s_param_B,
                  thru_s_param]
 
-    start_freq_input.get()
-    end_freq_input.get()
-    nop_input.get()
-    rbw_input.get()
-    power_input.get()
     start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
                                                       power_input)
-    settings, freq_vec, ports = init(start, stop, NOP, RBW, power)
+    settings, freq_vec, ports = init(start, stop, NOP, RBW, power)  # @Florian: Für die Initfunktion wäre ein eigener
+                                                                    # Button am sinnvolssten. In der VNAKit GUI ist noch
+                                                                    # eine Lampe mit dem Status und ein Shutdown-Button.
 
-    single_dual = 2
-    which_single_port = "Tx1"       # Text muss noch von GUI Eingabe übernommen werden
+    single_dual = 2                 # @Florian: Auswahl muss noch von GUI übernommen werden
+    which_single_port = "Tx1"       # @Florian: Text muss noch von GUI Eingabe übernommen werden
 
-    S_param_kompl, S_param_cor, S_param_dB = run_measurement(settings, single_dual, which_single_port, cal_files, ports, freq_vec)
+    S_param_kompl, S_param_cor, S_param_dB = run_measurement(settings, single_dual, which_single_port, cal_files, ports,
+                                                             freq_vec)
 
 
 def output_folder_button_clicked():
@@ -219,7 +215,6 @@ def save_button_clicked():
     global settings
 
     file_name = name_input.get()
-    # file_name = "Test"
     save_measurements(settings, freq_vec, S_param_kompl, S_param_cor, folder_path, file_name)
 
 def get_path_open():

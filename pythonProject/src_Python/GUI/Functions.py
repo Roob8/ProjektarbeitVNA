@@ -4,7 +4,6 @@ import vnakit
 import numpy as np
 import hidden as hid
 import utils as ut
-from sKompl_2_sLog import sKompl_2_sLog
 import pandas as pd
 import math
 from pathlib import Path
@@ -125,7 +124,7 @@ def single_measurement(vnakit, settings, tx, ports, freq_vec):
     return s_param_dB[len(rec_tx1),1,1]
 
 
-def dual_measurement(vnakit, settings, ports, freq_vec):
+def dual_measurement(vnakit, settings, ports):
     print('Recording...', end='')
     (rec_tx1, rec_tx2) = hid.measure2Port(vnakit, settings, ports)
     """#####
@@ -138,11 +137,44 @@ def dual_measurement(vnakit, settings, ports, freq_vec):
 
     return hid.ab2S(rec_tx1, rec_tx2, ports) # converting a/b waves to S-parameter
 
+def sKompl_2_sLog(s_param_kompl, frequency):
+    setup = []
+    S11_Betrag = []
+    S11_Phase = []
+    S21_Betrag =[]
+    S21_Phase = []
+    S12_Betrag = []
+    S12_Phase = []
+    S22_Betrag = []
+    S22_Phase = []
+
+    for x in range(len(frequency)):
+        S11_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][0][0])))
+        S11_Phase.append(np.angle(s_param_kompl[x][0][0], deg=True))
+
+        S21_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][1][0])))
+        S21_Phase.append(np.angle(s_param_kompl[x][1][0], deg=True))
+
+        S12_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][0][1])))
+        S12_Phase.append(np.angle(s_param_kompl[x][0][1], deg=True))
+
+        S22_Betrag.append(20 * math.log10(np.abs(s_param_kompl[x][1][1])))
+        S22_Phase.append(np.angle(s_param_kompl[x][1][1], deg=True))
+
+    return S11_Betrag, S11_Phase, S21_Betrag, S21_Phase, S12_Betrag, S12_Phase, S22_Betrag, S22_Phase
 
 def load_sparam(input_setings, path):
     S_param = "Platzhalter"
     return S_param
 
+def calibration(choosen_port, which_single_port, vnakit, settings, ports):
+
+    if choosen_port == 1:   # single-port measure
+        rec = hid.measure1Port(vnakit, settings, which_single_port)
+    elif choosen_port == 2:
+        (rec_tx1, rec_tx2) = hid.measure2Port(vnakit, settings, ports)
+    else:
+        print("Wrong measurement parameter!")
 
 def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec):
     """
@@ -167,7 +199,7 @@ def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec):
 
     elif single_dual == 2:
         # measure S-parameters
-        s_param_kompl = dual_measurement(vnakit, settings, ports, freq_vec)
+        s_param_kompl = dual_measurement(vnakit, settings, ports)
 
         # applying error correction with the error terms
         # s_param_cor = calibration_12_term(s_param_kompl, freq_vec, cal_files)
