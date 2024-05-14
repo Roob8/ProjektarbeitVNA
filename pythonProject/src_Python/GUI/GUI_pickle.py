@@ -186,14 +186,7 @@ def run_button_clicked():
     cal_files = [open_s_param_A, short_s_param_A, load_s_param_A, open_s_param_B, short_s_param_B, load_s_param_B,
                  thru_s_param]
 
-    start_freq_input.get()
-    end_freq_input.get()
-    nop_input.get()
-    rbw_input.get()
-    power_input.get()
-    start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
-                                                      power_input)
-    settings, freq_vec, ports = init(start, stop, NOP, RBW, power)
+    settings, freq_vec, ports = init(start_freq_input, end_freq_input, nop_input, rbw_input, power_input)
 
     single_dual = 2
     which_single_port = "Tx1"       # Text muss noch von GUI Eingabe übernommen werden
@@ -216,11 +209,10 @@ def save_button_clicked():
     global S_param_kompl
     global S_param_cor
     global folder_path
-    global settings
 
     file_name = name_input.get()
     # file_name = "Test"
-    save_measurements(settings, freq_vec, S_param_kompl, S_param_cor, folder_path, file_name)
+    save_measurements(freq_vec, S_param_kompl, S_param_cor, folder_path, file_name)
 
 def get_path_open():
     global open_s_param_A
