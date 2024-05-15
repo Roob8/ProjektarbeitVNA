@@ -79,6 +79,14 @@ def plot(freq_vec, S_param_meas, S_param, settings):
 
 
 def calibration_12_term(s_param_meas, freq_vec, cal_files):
+    global open_s_param_A
+    global short_s_param_A
+    global load_s_param_A
+    global open_s_param_B
+    global short_s_param_B
+    global load_s_param_B
+    global thru_s_param
+
     # filenames of the open, short, load standards
     sol_stds = ['stds/open.S1P', 'stds/short.S1P', 'stds/load.S1P']
 
@@ -91,7 +99,7 @@ def calibration_12_term(s_param_meas, freq_vec, cal_files):
 
     # constructs the 12-term model from the standards data and the data measured
     # from the prompt
-    print('Constructing 12-Term Error Model...')
+    # print('Constructing 12-Term Error Model...')
     #####
     with open('../Pickle/gamma_meas_p1.pkl', 'rb') as file:  # Daten laden
         gamma_meas_p1 = pickle.load(file)
@@ -100,8 +108,12 @@ def calibration_12_term(s_param_meas, freq_vec, cal_files):
     with open('../Pickle/thru_meas.pkl', 'rb') as file:  # Daten laden
         thru_meas = pickle.load(file)
     #####
+    # (Gamma_meas_p1, Gamma_meas_p2, Thru_meas) = prompt2PortSOLT(vnakit, settings, ports, isolation=False)
+    gamma_meas_p1 = open_s_param_A, short_s_param_A, load_s_param_A
+    gamma_meas_p2 = open_s_param_B, short_s_param_B, load_s_param_B
+
     (fwd_terms, rev_terms) = hid.get12TermModel(Gamma_listed, gamma_meas_p1,
-                                            Gamma_listed, gamma_meas_p2, Thru_listed, thru_meas)
+                                            Gamma_listed, gamma_meas_p2, Thru_listed, thru_s_param)
     # calibration is now complete (by having obtained the error terms)
 
     # applying error correction with the error terms
@@ -167,14 +179,64 @@ def load_sparam(input_setings, path):
     S_param = "Platzhalter"
     return S_param
 
-def calibration(choosen_port, which_single_port, vnakit, settings, ports):
+
+"""
+def calibration_measurement(choosen_port, which_single_port, vnakit, settings, ports):
 
     if choosen_port == 1:   # single-port measure
         rec = hid.measure1Port(vnakit, settings, which_single_port)
     elif choosen_port == 2:
+        # SOLT reflection coefficents and S-parameters
+        (Gamma_meas_p1, Gamma_meas_p2, Thru_meas) = \
+            prompt2PortSOLT(vnakit, settings, ports, isolation=False)
         (rec_tx1, rec_tx2) = hid.measure2Port(vnakit, settings, ports)
+
     else:
         print("Wrong measurement parameter!")
+"""
+
+def cal_measure_sol(vnakit,settings,ports,tx):
+    """
+        from measure1Port
+        makes a,b wave measurement at specified port
+        input:
+            vnakit: object (the board),
+            settings: vnakit settings object,
+            tx: port number of transmitter (ex. ports['Tx1'])
+        output:
+            rec: {1:[num_pts] , 2:[num_pts], ..., 6:[num_pts]}
+                recording dictionary with ports[tx] as transmitter
+    """
+
+    print('Recording...', end='')
+    rec = hid.measure1Port(vnakit, settings, tx)
+    return hid.ab2G(rec, ports)
+
+
+def cal_measure_t(vnakit, settings, ports, sw_corr):
+    """
+        from prompt2PortMeasure
+        Prompts the user to measure 2-port S-parameters
+        input:
+            vnakit: (the board) object
+            settings: vnakit settings object
+            ports: mapping dictionary
+                possible keys: ['Tx1','Tx2','Rx1A','Rx1B','Rx2A','Rx2B']
+                possible values: [1, 2, 3, 4, 5, 6]
+            name: string (optional) name of component is printed in the prompt
+            sw_corr: bool (optional) apply switch correction. Default True
+        output:
+            Sm: [num_pts,2,2] measured S-parameters
+        """
+
+    print('Recording...', end='')
+    (rec_tx1, rec_tx2) = hid.measure2Port(vnakit, settings, ports)
+    print('Done.\n')
+    if sw_corr:
+        return hid.ab2S_SwitchCorrect(rec_tx1, rec_tx2, ports)
+    else:
+        return hid.ab2S(rec_tx1, rec_tx2, ports)
+
 
 def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec):
     """

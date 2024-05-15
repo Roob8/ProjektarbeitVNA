@@ -47,8 +47,7 @@ def cal_buttom_clicked(port_variable, portlist):    # @Florian: Welcher Button w
     ideal_meas.grid(row=7, column=4, sticky=center)
     checkbox_plot_cal.grid(row=9, column=columns - 1, sticky=right)
 
-    settings, freq_vec, ports = init(100, 1000, 11, 10, -10)
-    calibration(choosen_port, which_single_port, vnakit, settings, ports)
+    # settings, freq_vec, ports = init(100, 1000, 11, 10, -10)
 
 def own_meas_clicked():
     path_open_output.config(state="normal")
@@ -394,25 +393,25 @@ def two_port_cal(port, DUT):
     global short_s_param_B
     global load_s_param_B
     global thru_s_param
-
-    input_settings = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input, power_input)
+    # ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
+    settings, freq_vec, ports = init(100, 1000, 11, 10, -10)    # @Florian: Werte aus GUI übernehmen
 
     if port == "AB":
-        thru_s_param = dual_measurement(input_settings)
+        thru_s_param = cal_measure_t(vnakit, settings, ports, sw_corr=True)      # @Florian: Auswahl von switch correction?
     if port == "A":
         if DUT == "Open":
-            open_s_param_A = single_measurement(input_settings, "A")
+            open_s_param_A = cal_measure_sol(vnakit, settings, ports, ports['Tx1'])
         if DUT == "Short":
-            short_s_param_A = single_measurement(input_settings, "A")
+            short_s_param_A = cal_measure_sol(vnakit, settings, ports, ports['Tx1'])
         if DUT == "Load":
-            load_s_param_A = single_measurement(input_settings, "A")
+            load_s_param_A = cal_measure_sol(vnakit, settings, ports, ports['Tx1'])
     if port == "B":
         if DUT == "Open":
-            open_s_param_B = single_measurement(input_settings, "B")
+            open_s_param_B = cal_measure_sol(vnakit, settings, ports, ports['Tx2'])
         if DUT == "Short":
-            short_s_param_B = single_measurement(input_settings, "B")
+            short_s_param_B = cal_measure_sol(vnakit, settings, ports, ports['Tx2'])
         if DUT == "Load":
-            load_s_param_B = single_measurement(input_settings, "B")
+            load_s_param_B = cal_measure_sol(vnakit, settings, ports, ports['Tx2'])
 
 
 columns = 5
