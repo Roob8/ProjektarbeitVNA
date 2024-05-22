@@ -12,11 +12,7 @@ def insert_blank_line(root, row, num_columns):
     blank_line = Label(root, text="")
     blank_line.grid(row=row, column=0, columnspan=num_columns)
 
-def init(start, stop, NOP, RBW, power):
-    # VNA kit port mapping, defining the Transceiver ports (1,2,...,6)
-    # to the VNA ports ('Tx1',Rx1A',...,'Rx2B')
-    ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
-
+def init(start, stop, NOP, RBW, power, tx):
     # intializes the board object
     vnakit.Init()
 
@@ -30,29 +26,26 @@ def init(start, stop, NOP, RBW, power):
             mode: One of VNAKIT_MODE_ONE_PORT ; VNAKIT_MODE_TWO_PORTS
     """
 
-
     settings = vnakit.RecordingSettings(
-        vnakit.FrequencyRange(100, 1000, 11),     # @Florian: Gibt Fehlermeldung --> must be real number not str
-        10,      # RBW (in KHz)
-        -10,   # output power (dbM)
-        ports['Tx1'],   # transmitter port
-        vnakit.VNAKIT_MODE_TWO_PORTS
+        vnakit.FrequencyRange(int(start), int(stop), int(NOP)),     # @Florian: Gibt Fehlermeldung --> must be real number not str
+        int(RBW),      # RBW (in KHz)
+        int(power),   # output power (dbM)
+        tx,   # transmitter port
+        vnakit.VNAKIT_MODE_TWO_PORTS        # Es muss noch die Auswahl der Moden eingestellt werden können
     )
     vnakit.ApplySettings(settings)
 
-    """# Get variable from stored file with module pickle
-    with open('../Pickle/settings.pkl', 'rb') as file:  # Daten laden
-        settings = pickle.load(file)
-        """
+    # # Get variable from stored file with module pickle
+    # with open('pythonProject/src_Python/Pickle/settings.pkl', 'rb') as file:  # Daten laden
+    #     settings = pickle.load(file)
 
 
     # actual frequency vector used by the board
     freq_vec = np.array(vnakit.GetFreqVector_MHz())
-    """
-    # Get variable from stored file with module pickle
-    with open('../Pickle/freq_vec.pkl', 'rb') as file:  # Daten laden
-        freq_vec = pickle.load(file)
-    """
+
+    # # Get variable from stored file with module pickle
+    # with open('pythonProject/src_Python/Pickle/freq_vec.pkl', 'rb') as file:  # Daten laden
+    #     freq_vec = pickle.load(file)
 
     print('The board is initialized with settings:\n')
 
@@ -60,7 +53,7 @@ def init(start, stop, NOP, RBW, power):
     settings_str = ut.getSettingsStr(settings)
     print(settings_str)
 
-    return settings, freq_vec, ports
+    return settings, freq_vec
 
 def get_input_settings(start, stop, NOP, RBW, power):
     settings = []
@@ -71,6 +64,7 @@ def get_input_settings(start, stop, NOP, RBW, power):
     settings.append(power.get().strip())
 
     return settings[0], settings[1], settings[2], settings[3], settings[4]   # @Florian: Besser lösen
+
 
 def plot(freq_vec, S_param_meas, S_param, settings):
     settings_str = ut.getSettingsStr(settings)
@@ -139,12 +133,6 @@ def single_measurement(vnakit, settings, tx, ports, freq_vec):
 def dual_measurement(vnakit, settings, ports):
     print('Recording...', end='')
     (rec_tx1, rec_tx2) = hid.measure2Port(vnakit, settings, ports)
-    """#####
-    with open('../Pickle/rec_tx1.pkl', 'rb') as file:  # Daten laden
-        rec_tx1 = pickle.load(file)
-    with open('../Pickle/rec_tx2.pkl', 'rb') as file:  # Daten laden
-        rec_tx2 = pickle.load(file)
-    #####"""
     print('Done.\n')
 
     return hid.ab2S(rec_tx1, rec_tx2, ports) # converting a/b waves to S-parameter
@@ -195,7 +183,7 @@ def calibration_measurement(choosen_port, which_single_port, vnakit, settings, p
         print("Wrong measurement parameter!")
 """
 
-def cal_measure_sol(vnakit,settings,ports,tx):
+def cal_measure_sol(vnakit,settings,ports,tx):          # Kalibrationsmessung von Short, Open, Load
     """
         from measure1Port
         makes a,b wave measurement at specified port
@@ -208,12 +196,12 @@ def cal_measure_sol(vnakit,settings,ports,tx):
                 recording dictionary with ports[tx] as transmitter
     """
 
-    print('Recording...', end='')
     rec = hid.measure1Port(vnakit, settings, tx)
+    print('Done.\n')
     return hid.ab2G(rec, ports)
 
 
-def cal_measure_t(vnakit, settings, ports, sw_corr):
+def cal_measure_t(vnakit, settings, ports, sw_corr):    # # Kalibrationsmessung von Thru
     """
         from prompt2PortMeasure
         Prompts the user to measure 2-port S-parameters
@@ -229,13 +217,53 @@ def cal_measure_t(vnakit, settings, ports, sw_corr):
             Sm: [num_pts,2,2] measured S-parameters
         """
 
-    print('Recording...', end='')
+    print('Measure thru ......', end='')
     (rec_tx1, rec_tx2) = hid.measure2Port(vnakit, settings, ports)
     print('Done.\n')
     if sw_corr:
         return hid.ab2S_SwitchCorrect(rec_tx1, rec_tx2, ports)
     else:
         return hid.ab2S(rec_tx1, rec_tx2, ports)
+
+def choose_calibration(freq_vec, cal_s_param):
+    calibration_data = {
+        0: "Open Port A",
+        1: "Open Port B",
+        2: "Short Port A",
+        3: "Short Port B",
+        4: "Load Port A",
+        5: "Load Port B",
+        6: "Thru"
+    }
+
+    # Wenn Ideale S-Parameter, dann müssen diese geladen werden. Wenn nicht ideale S-Parameter, dann muss überprüft
+    # werden, ob diese vorhanden sind
+
+    cal_method = 1       # @Florian: Hier die Variable einfügen, welche die Auswahl der Kalibration beeinhaltet
+    if cal_method == 0:     # ideal S-Parameter
+        # @ Florian: Ideale S-Parameter Dateien müssen noch mit dem richtigen Inhalt befüllt werden
+        cal_s_param[0]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
+        cal_s_param[1]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
+        cal_s_param[2] = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
+        cal_s_param[3] = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
+        cal_s_param[4]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
+        cal_s_param[5]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
+        cal_s_param[6]    = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s1p", freq_vec)
+    elif cal_method == 1:   # Überprüfen, ob alle S-Parameter vorhanden sind. Bei eigenständigem Laden der
+                            # gespeicherte oder gemessene S-Parameter
+        brk = 0
+        x = 0
+        for element in cal_s_param:        # Prüfen, ob alle Parameterdateien vorhanden sind
+            if cal_s_param[element] == 0:
+                print(f"Es fehlt die Kalibrationsdatei an {calibration_data[x]}")
+                brk = 1
+            x += 1
+        if brk == 1:
+            return 1    # Messung wird nicht ausgeführt
+    return 0
+
+
+
 
 
 def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec):
@@ -338,4 +366,6 @@ def save_measurements(settings, freq_vec, s_param_kompl, S_param_cor, folder_pat
     data.to_excel(file_path + ".xlsx")
 
     print("Save measurements done!")
+
+ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
 
