@@ -4,8 +4,8 @@ from Functions import *
 import vnakit
 
 ########################################################################################################################
-global choosen_port  # Globale Variable ob single oder dual port
-global which_single_port  # Globale Variable für den gewählten Port (A oder B)
+#global choosen_port  # Globale Variable ob single oder dual port
+#global which_single_port  # Globale Variable für den gewählten Port (A oder B)
 
 global open_s_param_A
 global short_s_param_A
@@ -14,25 +14,10 @@ global open_s_param_B
 global short_s_param_B
 global load_s_param_B
 global thru_s_param
+global choosen_port
 
 ########################################################################################################################
 
-def get_ideal_s_params():
-    global open_s_param_A
-    global short_s_param_A
-    global load_s_param_A
-    global open_s_param_B
-    global short_s_param_B
-    global load_s_param_B
-    global thru_s_param
-
-    open_s_param_A = "ideale open s params"
-    short_s_param_A = "ideale short s params"
-    load_s_param_A = "ideale load s params"
-    open_s_param_B = "ideale open s params"
-    short_s_param_B = "ideale short s params"
-    load_s_param_B = "ideale load s params"
-    thru_s_param = "ideale thru s params"
 
 
 def cal_buttom_clicked(port_variable, portlist):
@@ -49,17 +34,8 @@ def cal_buttom_clicked(port_variable, portlist):
     which_single_port = portlist.get(portlist_index)    # Port A = 'A', Port B = 'B'
     choosen_port = port_variable.get()                  # 1 = Single, 2 = Dual
 
-    # @ Florian: Vor der Messung wird in der Funktion choose_calibration() überprüft, ob die Kalibration vollständig
-    # gemacht wurde. Deshalb müssen die Variablen hier initialisiert werden. Bug/ Feature ist, dass bei erneutem
-    # drücken von dem Button "Kalibrationsauswahl" alle bisherigen gespeicherten Kalibrationsdaten wieder mit 0
-    # überschrieben werden.
-
-    cal_s_param = [0,0,0,0,0,0,0]
-
-    # settings, freq_vec, ports = init(100, 1000, 11, 10, -10)
 
 def own_meas_clicked():
-    global choosen_port
 
     path_open_output.config(state="normal")
     path_open_output.delete("1.0", "end")
@@ -101,12 +77,12 @@ def own_meas_clicked():
     path_thru_output.delete("1.0", "end")
     path_thru_output.config(state="disabled")
 
-    if choosen_port == 1:
+    if choosen_port_internal == 1:
         dual_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
         dual_port_frame_s.grid_remove()
         single_port_frame_own.grid(row=8, column=1, columnspan=columns, sticky=left)
-    if choosen_port == 2:
+    if choosen_port_internal == 2:
         single_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
         dual_port_frame_s.grid_remove()
@@ -114,13 +90,13 @@ def own_meas_clicked():
 
 
 def s_param_clicked():
-    global choosen_port
-    if choosen_port == 1:
+
+    if choosen_port_internal == 1:
         dual_port_frame_own.grid_remove()
         single_port_frame_own.grid_remove()
         dual_port_frame_s.grid_remove()
         single_port_frame_s.grid(row=8, column=1, columnspan=columns, sticky=left)
-    if choosen_port == 2:
+    if choosen_port_internal == 2:
         dual_port_frame_own.grid_remove()
         single_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
@@ -173,14 +149,39 @@ def ideal_clicked():
     path_thru_output.delete("1.0", "end")
     path_thru_output.config(state="disabled")
 
+    global open_s_param_A
+    global short_s_param_A
+    global load_s_param_A
+    global open_s_param_B
+    global short_s_param_B
+    global load_s_param_B
+    global thru_s_param
+
+    start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
+                                                      power_input)
+    settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'], "VNAKIT_MODE_ONE_PORT")
+
+    # @ Florian: Ideale S-Parameter Dateien müssen noch mit dem richtigen Inhalt befüllt werden
+    open_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
+    short_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
+    load_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
+    open_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
+    short_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
+    load_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
+    thru_s_param = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s1p", freq_vec)
+
+
 def run_button_clicked():
     global S_param_kompl
     global S_param_cor
     global S_param_dB
-    global settings
-    global freq_vec
-    global choosen_port
-    global cal_s_param
+    global open_s_param_A
+    global short_s_param_A
+    global load_s_param_A
+    global open_s_param_B
+    global short_s_param_B
+    global load_s_param_B
+    global thru_s_param
 
     output_folder_button.grid(row=12, column=1, sticky=center)
     output_folder_output.grid(row=12, column=2, sticky=center)
@@ -189,25 +190,26 @@ def run_button_clicked():
     name_input.grid(row=14, column=2, sticky=left)
     save_button.grid(row=12, column=4, sticky=center)
 
+    start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
+                                                      power_input)
+    settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'], "VNAKIT_MODE_ONE_PORT")
+
     cal_files = [open_s_param_A, short_s_param_A, load_s_param_A, open_s_param_B, short_s_param_B, load_s_param_B,
                  thru_s_param]
 
-    start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
-                                                      power_input)
-    settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'])  # @Florian: Für die Initfunktion wäre ein eigener
-                                                                    # Button am sinnvolssten. In der VNAKit GUI ist noch
-                                                                    # eine Lampe mit dem Status und ein Shutdown-Button.
-
-    calibration_selected = 1  # @Florian: Woran erkennen, dass Kalibration ausgewählt ist?
+    calibration_selected = 1  # @Florian: Woran erkennt man, dass Kalibration ausgewählt ist?
     if calibration_selected == 1:
-        status_cal = choose_calibration(freq_vec, cal_s_param)  # status_cal == 1 --> Fehlende Kalibrationsdaten
-        if status_cal == 1:
+        status_cal = check_calibration(start, stop, NOP, RBW, power, cal_files)  # check if all calibration files exist
+        if status_cal == 1:     # status_cal == 1 --> missing calibration file
+            print("Messung nicht gestartet\n")
             return
 
-    single_dual = 2                 # @Florian: Auswahl muss noch von GUI übernommen werden
-    which_single_port = "Tx1"       # @Florian: Text muss noch von GUI Eingabe übernommen werden
+    if which_single_port == "A":
+        tx = "Tx1"
+    elif which_single_port == "B":
+        tx = "Tx2"
 
-    S_param_kompl, S_param_cor, S_param_dB = run_measurement(settings, single_dual, which_single_port, cal_files, ports,
+    S_param_kompl, S_param_cor, S_param_dB = run_measurement(settings, choosen_port_internal, tx, cal_files, ports,
                                                              freq_vec)
 
 
@@ -374,7 +376,7 @@ def one_port_cal(port, DUT):
     start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
                                                       power_input)
     if port == "A":
-        settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'])
+        settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'], "VNAKIT_MODE_ONE_PORT")
         if DUT == "Open":
             print('Measure Open Port A')
             open_s_param_A = cal_measure_sol(vnakit, settings, ports, ports['Tx1'])
@@ -385,7 +387,7 @@ def one_port_cal(port, DUT):
             print('Measure Load Port A')
             load_s_param_A = cal_measure_sol(vnakit, settings, ports, ports['Tx1'])
     if port == "B":
-        settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx2'])
+        settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx2'], "VNAKIT_MODE_ONE_PORT")
         if DUT == "Open":
             print('Measure Open Port B')
             open_s_param_B = cal_measure_sol(vnakit, settings, ports, ports['Tx2'])
@@ -396,7 +398,7 @@ def one_port_cal(port, DUT):
             print('Measure Load Port B')
             load_s_param_B = cal_measure_sol(vnakit, settings, ports, ports['Tx2'])
     if DUT == "Thru":
-        settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx2'])
+        settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx2'], "VNAKIT_MODE_TWO_PORT")
         print('Measure Thru')
         thru_s_param = cal_measure_t(vnakit, settings, ports, sw_corr=True)  # @Florian: Auswahl von switch correction?
 
@@ -412,8 +414,7 @@ def two_port_cal(port, DUT):
 
     start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
                                                       power_input)
-
-    settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'])
+    settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'], "VNAKIT_MODE_TWO_PORT")
 
     if port == "AB":
         print('Measure Thru')
@@ -443,10 +444,19 @@ def two_port_cal(port, DUT):
 columns = 5
 root = Tk()
 ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
-get_ideal_s_params()
 
 choosen_port_internal = IntVar(value=2)     # Dual ist ausgewählt
 channel_cal_method = IntVar(value=3)        # Ideale Kalibration ist ausgewählt
+
+# Initialisieren von globalen Variablen
+open_s_param_A = 0
+short_s_param_A = 0
+load_s_param_A = 0
+open_s_param_B = 0
+short_s_param_B = 0
+load_s_param_B = 0
+thru_s_param = 0
+choosen_port = 0
 
 root.title("Network Analyzer GUI")
 x_size = 1000

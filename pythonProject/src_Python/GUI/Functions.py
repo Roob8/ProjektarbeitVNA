@@ -1,51 +1,60 @@
-from tkinter import *
-import pickle
-import vnakit
-import numpy as np
-import hidden as hid
-import utils as ut
-import pandas as pd
 import math
 from pathlib import Path
+from tkinter import *
+import numpy as np
+import pandas as pd
+import hidden as hid
+import utils as ut
+import vnakit
+import pickle
+
+global start_freq_input
+global end_freq_input
+global nop_input
+global rbw_input
+global power_input
 
 def insert_blank_line(root, row, num_columns):
     blank_line = Label(root, text="")
     blank_line.grid(row=row, column=0, columnspan=num_columns)
 
-def init(start, stop, NOP, RBW, power, tx):
-    # intializes the board object
-    vnakit.Init()
 
-    # VNA Kit settings
-    """
-            Attributes of settings:
-            freqRange: of type FrequencyRange.
-            rbw_khz: RBW (in KHz); use GetRbwLimits() for permitted values
-            outputPower_dbm: Output power (in dbm); use GetPowerLimits() for permitted values
-            txtr: Transmitter port -- integer from 1 to 6
-            mode: One of VNAKIT_MODE_ONE_PORT ; VNAKIT_MODE_TWO_PORTS
-    """
+def init(start, stop, NOP, RBW, power, tx, mode):
+    # # intializes the board object
+    # vnakit.Init()                         # @Florian: Für die Initfunktion wäre ein eigener
+    #                                       # Button am sinnvolssten. In der VNAKit GUI ist noch
+    #                                       # eine Lampe mit dem Status und ein Shutdown-Button.
+    #
+    # # VNA Kit settings
+    # """
+    #         Attributes of settings:
+    #         freqRange: of type FrequencyRange.
+    #         rbw_khz: RBW (in KHz); use GetRbwLimits() for permitted values
+    #         outputPower_dbm: Output power (in dbm); use GetPowerLimits() for permitted values
+    #         txtr: Transmitter port -- integer from 1 to 6
+    #         mode: One of VNAKIT_MODE_ONE_PORT ; VNAKIT_MODE_TWO_PORTS
+    # """
+    #
+    # settings = vnakit.RecordingSettings(
+    #     vnakit.FrequencyRange(int(start), int(stop), int(NOP)),
+    #     # @Florian: Gibt Fehlermeldung --> must be real number not str
+    #     int(RBW),  # RBW (in KHz)
+    #     int(power),  # output power (dbM)
+    #     tx,  # transmitter port
+    #     mode  # Es muss noch die Auswahl der Moden eingestellt werden können
+    # )
+    # vnakit.ApplySettings(settings)
 
-    settings = vnakit.RecordingSettings(
-        vnakit.FrequencyRange(int(start), int(stop), int(NOP)),     # @Florian: Gibt Fehlermeldung --> must be real number not str
-        int(RBW),      # RBW (in KHz)
-        int(power),   # output power (dbM)
-        tx,   # transmitter port
-        vnakit.VNAKIT_MODE_TWO_PORTS        # Es muss noch die Auswahl der Moden eingestellt werden können
-    )
-    vnakit.ApplySettings(settings)
-
-    # # Get variable from stored file with module pickle
-    # with open('pythonProject/src_Python/Pickle/settings.pkl', 'rb') as file:  # Daten laden
-    #     settings = pickle.load(file)
-
+    # Get variable from stored file with module pickle
+    with open('pythonProject/src_Python/Pickle/settings.pkl', 'rb') as file:  # Daten laden
+        settings = pickle.load(file)
 
     # actual frequency vector used by the board
-    freq_vec = np.array(vnakit.GetFreqVector_MHz())
+    # freq_vec = np.array(vnakit.GetFreqVector_MHz())
 
-    # # Get variable from stored file with module pickle
-    # with open('pythonProject/src_Python/Pickle/freq_vec.pkl', 'rb') as file:  # Daten laden
-    #     freq_vec = pickle.load(file)
+    # Get variable from stored file with module pickle
+    with open('pythonProject/src_Python/Pickle/freq_vec.pkl', 'rb') as file:  # Daten laden
+        freq_vec = pickle.load(file)
 
     print('The board is initialized with settings:\n')
 
@@ -55,6 +64,7 @@ def init(start, stop, NOP, RBW, power, tx):
 
     return settings, freq_vec
 
+
 def get_input_settings(start, stop, NOP, RBW, power):
     settings = []
     settings.append(start.get().strip())
@@ -63,16 +73,10 @@ def get_input_settings(start, stop, NOP, RBW, power):
     settings.append(RBW.get().strip())
     settings.append(power.get().strip())
 
-    return settings[0], settings[1], settings[2], settings[3], settings[4]   # @Florian: Besser lösen
+    return settings[0], settings[1], settings[2], settings[3], settings[4]  # @Florian: Besser lösen
 
 
-def plot(freq_vec, S_param_meas, S_param, settings):
-    settings_str = ut.getSettingsStr(settings)
-    hid.plotCompareDb(freq_vec, [S_param_meas, S_param],
-                  ['Uncorrected', '12-term Corrected'], settings_str)
-
-
-def calibration_12_term(s_param_meas, freq_vec, cal_files):
+def get_ideal_s_params(start, stop, NOP, RBW, power):
     global open_s_param_A
     global short_s_param_A
     global load_s_param_A
@@ -81,33 +85,53 @@ def calibration_12_term(s_param_meas, freq_vec, cal_files):
     global load_s_param_B
     global thru_s_param
 
+    settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'], "VNAKIT_MODE_ONE_PORT")
+
+    # @ Florian: Ideale S-Parameter Dateien müssen noch mit dem richtigen Inhalt befüllt werden
+    open_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
+    short_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
+    load_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
+    open_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
+    short_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
+    load_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
+    thru_s_param = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s1p", freq_vec)
+
+
+def calibration_12_term(s_param_meas, freq_vec, cal_files):
+    # global open_s_param_A
+    # global short_s_param_A
+    # global load_s_param_A
+    # global open_s_param_B
+    # global short_s_param_B
+    # global load_s_param_B
+    # global thru_s_param
+
     # filenames of the open, short, load standards
     sol_stds = ['stds/open.S1P', 'stds/short.S1P', 'stds/load.S1P']
 
     # puts the reflection coefficents of the SOL standards in single array.
     # Also interpolates in frequency. See vnakit_ex/utils.py
-    Gamma_listed = ut.loadGammaListed(sol_stds, freq_vec * 1e6)
+    gamma_listed = ut.loadGammaListed(sol_stds, freq_vec * 1e6)
 
     # loads S-parameter data of the thru standard, interpolates frequency
-    Thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec * 1e6)
+    thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec * 1e6)
 
     # constructs the 12-term model from the standards data and the data measured
     # from the prompt
     # print('Constructing 12-Term Error Model...')
-    #####
-    with open('../Pickle/gamma_meas_p1.pkl', 'rb') as file:  # Daten laden
-        gamma_meas_p1 = pickle.load(file)
-    with open('../Pickle/gamma_meas_p2.pkl', 'rb') as file:  # Daten laden
-        gamma_meas_p2 = pickle.load(file)
-    with open('../Pickle/thru_meas.pkl', 'rb') as file:  # Daten laden
-        thru_meas = pickle.load(file)
-    #####
-    # (Gamma_meas_p1, Gamma_meas_p2, Thru_meas) = prompt2PortSOLT(vnakit, settings, ports, isolation=False)
+
+    # with open('../Pickle/gamma_meas_p1.pkl', 'rb') as file:  # Daten laden
+    #     gamma_meas_p1 = pickle.load(file)
+    # with open('../Pickle/gamma_meas_p2.pkl', 'rb') as file:  # Daten laden
+    #     gamma_meas_p2 = pickle.load(file)
+    # with open('../Pickle/thru_meas.pkl', 'rb') as file:  # Daten laden
+    #     thru_meas = pickle.load(file)
+
     gamma_meas_p1 = open_s_param_A, short_s_param_A, load_s_param_A
     gamma_meas_p2 = open_s_param_B, short_s_param_B, load_s_param_B
 
-    (fwd_terms, rev_terms) = hid.get12TermModel(Gamma_listed, gamma_meas_p1,
-                                            Gamma_listed, gamma_meas_p2, Thru_listed, thru_s_param)
+    (fwd_terms, rev_terms) = hid.get12TermModel(gamma_listed, gamma_meas_p1,
+                                                gamma_listed, gamma_meas_p2, thru_listed, thru_s_param)
     # calibration is now complete (by having obtained the error terms)
 
     # applying error correction with the error terms
@@ -127,7 +151,7 @@ def single_measurement(vnakit, settings, tx, ports, freq_vec):
     # converting complex S-parameters to magnitude and angle (dB and phase)
     s_param_dB = sKompl_2_sLog(s_param_kompl, freq_vec)
 
-    return s_param_dB[len(rec_tx1),1,1]
+    return s_param_dB[len(rec_tx1), 1, 1]
 
 
 def dual_measurement(vnakit, settings, ports):
@@ -135,13 +159,14 @@ def dual_measurement(vnakit, settings, ports):
     (rec_tx1, rec_tx2) = hid.measure2Port(vnakit, settings, ports)
     print('Done.\n')
 
-    return hid.ab2S(rec_tx1, rec_tx2, ports) # converting a/b waves to S-parameter
+    return hid.ab2S(rec_tx1, rec_tx2, ports)  # converting a/b waves to S-parameter
+
 
 def sKompl_2_sLog(s_param_kompl, frequency):
     setup = []
     S11_Betrag = []
     S11_Phase = []
-    S21_Betrag =[]
+    S21_Betrag = []
     S21_Phase = []
     S12_Betrag = []
     S12_Phase = []
@@ -163,6 +188,7 @@ def sKompl_2_sLog(s_param_kompl, frequency):
 
     return S11_Betrag, S11_Phase, S21_Betrag, S21_Phase, S12_Betrag, S12_Phase, S22_Betrag, S22_Phase
 
+
 def load_sparam(input_setings, path):
     S_param = "Platzhalter"
     return S_param
@@ -183,7 +209,8 @@ def calibration_measurement(choosen_port, which_single_port, vnakit, settings, p
         print("Wrong measurement parameter!")
 """
 
-def cal_measure_sol(vnakit,settings,ports,tx):          # Kalibrationsmessung von Short, Open, Load
+
+def cal_measure_sol(vnakit, settings, ports, tx):  # Kalibrationsmessung von Short, Open, Load
     """
         from measure1Port
         makes a,b wave measurement at specified port
@@ -201,7 +228,7 @@ def cal_measure_sol(vnakit,settings,ports,tx):          # Kalibrationsmessung vo
     return hid.ab2G(rec, ports)
 
 
-def cal_measure_t(vnakit, settings, ports, sw_corr):    # # Kalibrationsmessung von Thru
+def cal_measure_t(vnakit, settings, ports, sw_corr):  # # Kalibrationsmessung von Thru
     """
         from prompt2PortMeasure
         Prompts the user to measure 2-port S-parameters
@@ -225,8 +252,9 @@ def cal_measure_t(vnakit, settings, ports, sw_corr):    # # Kalibrationsmessung 
     else:
         return hid.ab2S(rec_tx1, rec_tx2, ports)
 
-def choose_calibration(freq_vec, cal_s_param):
-    calibration_data = {
+
+def check_calibration(start, stop, NOP, RBW, power, cal_files):
+    calibration_string = {
         0: "Open Port A",
         1: "Open Port B",
         2: "Short Port A",
@@ -236,34 +264,21 @@ def choose_calibration(freq_vec, cal_s_param):
         6: "Thru"
     }
 
-    # Wenn Ideale S-Parameter, dann müssen diese geladen werden. Wenn nicht ideale S-Parameter, dann muss überprüft
-    # werden, ob diese vorhanden sind
+    cal_method = 2          # @Florian: Wie erkennen, welche Kalibrations ausgewählt wurde?
+    if cal_method == 3:   # ideal S-Parameter
+        get_ideal_s_params(start, stop, NOP, RBW, power)
 
-    cal_method = 1       # @Florian: Hier die Variable einfügen, welche die Auswahl der Kalibration beeinhaltet
-    if cal_method == 0:     # ideal S-Parameter
-        # @ Florian: Ideale S-Parameter Dateien müssen noch mit dem richtigen Inhalt befüllt werden
-        cal_s_param[0]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
-        cal_s_param[1]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
-        cal_s_param[2] = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
-        cal_s_param[3] = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
-        cal_s_param[4]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
-        cal_s_param[5]  = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
-        cal_s_param[6]    = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s1p", freq_vec)
-    elif cal_method == 1:   # Überprüfen, ob alle S-Parameter vorhanden sind. Bei eigenständigem Laden der
-                            # gespeicherte oder gemessene S-Parameter
-        brk = 0
-        x = 0
-        for element in cal_s_param:        # Prüfen, ob alle Parameterdateien vorhanden sind
-            if cal_s_param[element] == 0:
-                print(f"Es fehlt die Kalibrationsdatei an {calibration_data[x]}")
-                brk = 1
-            x += 1
-        if brk == 1:
-            return 1    # Messung wird nicht ausgeführt
-    return 0
-
-
-
+    # check if all S-Parameter files exist
+    brk = 0
+    x = 0
+    for element in cal_files:
+        if cal_files[element] == 0:
+            print(f"Es fehlen die Kalibrationsdaten von {calibration_string[x]}")
+            brk = 1
+        x += 1
+    if brk == 1:
+        return 1    # measurement is not executed
+    return 0        # measurement can be executed
 
 
 def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec):
@@ -295,20 +310,26 @@ def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec):
         # s_param_cor = calibration_12_term(s_param_kompl, freq_vec, cal_files)
 
         # converting complex S-parameters to magnitude and angle (dB and phase)
-        s_param_dB = sKompl_2_sLog(s_param_kompl, freq_vec) # s_param_kompl eigentlich s_param_cor
+        s_param_dB = sKompl_2_sLog(s_param_kompl, freq_vec)  # s_param_kompl eigentlich s_param_cor
 
         #plot(freq_vec, s_param_kompl, s_param_cor, settings)
 
     else:
         print("Wrong measurement parameter")
 
-    s_param_cor = s_param_kompl     # Weil calibration_12_term noch nicht implementiert
+    s_param_cor = s_param_kompl  # Weil calibration_12_term noch nicht implementiert
     return s_param_kompl, s_param_cor, s_param_dB
+
+
+def plot(freq_vec, S_param_meas, S_param, settings):
+    settings_str = ut.getSettingsStr(settings)
+    hid.plotCompareDb(freq_vec, [S_param_meas, S_param],
+                      ['Uncorrected', '12-term Corrected'], settings_str)
 
 
 def save_measurements(settings, freq_vec, s_param_kompl, S_param_cor, folder_path, file_name):
     file_path = folder_path + "/" + file_name
-    
+
     # store measurement in touchstone files
     hid.writeSnP(freq_vec, s_param_kompl, file_path + "_uncorrected.S2P", freq_unit='MHz')
     hid.writeSnP(freq_vec, S_param_cor, file_path + ".S2P", freq_unit='MHz')
@@ -367,5 +388,5 @@ def save_measurements(settings, freq_vec, s_param_kompl, S_param_cor, folder_pat
 
     print("Save measurements done!")
 
-ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
 
+ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
