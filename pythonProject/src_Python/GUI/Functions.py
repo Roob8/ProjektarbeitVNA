@@ -8,12 +8,6 @@ import utils as ut
 import vnakit
 import pickle
 
-global start_freq_input
-global end_freq_input
-global nop_input
-global rbw_input
-global power_input
-
 def insert_blank_line(root, row, num_columns):
     blank_line = Label(root, text="")
     blank_line.grid(row=row, column=0, columnspan=num_columns)
@@ -66,14 +60,16 @@ def init(start, stop, NOP, RBW, power, tx, mode):
 
 
 def get_input_settings(start, stop, NOP, RBW, power):
+
     settings = []
+
     settings.append(start.get().strip())
     settings.append(stop.get().strip())
     settings.append(NOP.get().strip())
     settings.append(RBW.get().strip())
     settings.append(power.get().strip())
 
-    return settings[0], settings[1], settings[2], settings[3], settings[4]  # @Florian: Besser lösen
+    return settings
 
 
 def get_ideal_s_params(start, stop, NOP, RBW, power):
@@ -94,7 +90,7 @@ def get_ideal_s_params(start, stop, NOP, RBW, power):
     open_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
     short_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
     load_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
-    thru_s_param = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s1p", freq_vec)
+    thru_s_param = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s2p", freq_vec)
 
 
 def calibration_12_term(s_param_meas, freq_vec, cal_files):

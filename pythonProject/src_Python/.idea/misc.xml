@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Projektarbeit_VNA" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Projektarbeit_VNA" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="VNA_backup" project-jdk-type="Python SDK" />
 </project>

@@ -77,12 +77,12 @@ def own_meas_clicked():
     path_thru_output.delete("1.0", "end")
     path_thru_output.config(state="disabled")
 
-    if choosen_port_internal == 1:
+    if choosen_port_internal.get() == 1:
         dual_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
         dual_port_frame_s.grid_remove()
         single_port_frame_own.grid(row=8, column=1, columnspan=columns, sticky=left)
-    if choosen_port_internal == 2:
+    if choosen_port_internal.get() == 2:
         single_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
         dual_port_frame_s.grid_remove()
@@ -91,12 +91,12 @@ def own_meas_clicked():
 
 def s_param_clicked():
 
-    if choosen_port_internal == 1:
+    if choosen_port_internal.get() == 1:
         dual_port_frame_own.grid_remove()
         single_port_frame_own.grid_remove()
         dual_port_frame_s.grid_remove()
         single_port_frame_s.grid(row=8, column=1, columnspan=columns, sticky=left)
-    if choosen_port_internal == 2:
+    if choosen_port_internal.get() == 2:
         dual_port_frame_own.grid_remove()
         single_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
@@ -157,9 +157,7 @@ def ideal_clicked():
     global load_s_param_B
     global thru_s_param
 
-    start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
-                                                      power_input)
-    settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'], "VNAKIT_MODE_ONE_PORT")
+
 
     # @ Florian: Ideale S-Parameter Dateien müssen noch mit dem richtigen Inhalt befüllt werden
     open_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
@@ -168,7 +166,7 @@ def ideal_clicked():
     open_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
     short_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Short.s1p", freq_vec)
     load_s_param_B = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Load.s1p", freq_vec)
-    thru_s_param = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s1p", freq_vec)
+    thru_s_param = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Thru.s2p", freq_vec)
 
 
 def run_button_clicked():
@@ -198,6 +196,8 @@ def run_button_clicked():
                  thru_s_param]
 
     calibration_selected = 1  # @Florian: Woran erkennt man, dass Kalibration ausgewählt ist?
+    # channel_cal_method kann erkennen welche Kallibrationsmethode ausgewählt ist --> Nur checken wenn channel_cal_method == (1 oder 2) --> denn dann entweder eigene messung oder s params ausgewählt+
+    # channel_cal_method muss dann aber eine globale Variable sein
     if calibration_selected == 1:
         status_cal = check_calibration(start, stop, NOP, RBW, power, cal_files)  # check if all calibration files exist
         if status_cal == 1:     # status_cal == 1 --> missing calibration file
@@ -401,7 +401,7 @@ def one_port_cal(port, DUT):
         settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx2'], "VNAKIT_MODE_TWO_PORT")
         print('Measure Thru')
         thru_s_param = cal_measure_t(vnakit, settings, ports, sw_corr=True)  # @Florian: Auswahl von switch correction?
-
+        # ich würde immer mit switch correction Kallibrieren kann aber auch eine Box setzen
 
 def two_port_cal(port, DUT):
     global open_s_param_A
@@ -418,7 +418,7 @@ def two_port_cal(port, DUT):
 
     if port == "AB":
         print('Measure Thru')
-        thru_s_param = cal_measure_t(vnakit, settings, ports, sw_corr=True)         # @Florian: Auswahl von switch correction?
+        thru_s_param = cal_measure_t(vnakit, settings, ports, sw_corr=True)         # @Florian: Auswahl von switch correction? # genau so wie oben
     if port == "A":
         if DUT == "Open":
             print('Measure Open Port A')
