@@ -5,14 +5,13 @@ import numpy as np
 import pandas as pd
 import hidden as hid
 import utils as ut
-import vnakit
 import pickle
 
 def insert_blank_line(root, row, num_columns):
     blank_line = Label(root, text="")
     blank_line.grid(row=row, column=0, columnspan=num_columns)
 
-
+##brauchen wir vllt nicht
 def init(start, stop, NOP, RBW, power, tx, mode):
     # # intializes the board object
     # vnakit.Init()                         # @Florian: Für die Initfunktion wäre ein eigener
@@ -58,7 +57,34 @@ def init(start, stop, NOP, RBW, power, tx, mode):
 
     return settings, freq_vec
 
+def get_frequency_vector(start, stop, NOP):
 
+    start_int = start.get().strip()
+    stop_int = stop.get().strip()
+    NOP_int = NOP.get().strip()
+
+    freq_vec = np.linspace(int(start_int), int(stop_int), int(NOP_int))
+    return freq_vec
+
+def get_settings(start, stop, NOP, RBW, power, vnakit):# Felix ist der Mode wichtig?
+
+    start_int = int(start.get().strip())
+    end_int = int(stop.get().strip())
+    NOP_int = int(NOP.get().strip())
+    RBW_int = int(RBW.get().strip())
+    power_int = int(power.get().strip())
+
+    settings = vnakit.RecordingSettings(
+        vnakit.FrequencyRange(start_int, end_int, NOP_int),  # fmin,fmax,num_points
+        RBW_int,  # RBW (in KHz)
+        power_int,  # output power (dbM)
+        ports['Tx1'],  # transmitter port ## Felix ist das unwichtig? weil eh überschrieben wird?
+        vnakit.VNAKIT_MODE_TWO_PORTS
+    )
+
+    return settings
+
+## brauchen wir vllt nicht
 def get_input_settings(start, stop, NOP, RBW, power):
 
     settings = []
@@ -277,7 +303,7 @@ def check_calibration(start, stop, NOP, RBW, power, cal_files):
     return 0        # measurement can be executed
 
 
-def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec):
+def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec, vnakit):
     """
         makes port measurement
         input:

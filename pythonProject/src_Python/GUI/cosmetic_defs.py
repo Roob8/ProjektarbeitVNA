@@ -15,3 +15,4 @@ bw = 1
 # definition of colors
 green = "#B3EE3A"
 grey = "#C1CDCD"
+red = "#FF4500"

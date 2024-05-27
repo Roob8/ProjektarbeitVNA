@@ -1,11 +1,12 @@
+from utils import getSettingsStr
 from cosmetic_defs import *
 from tkinter import filedialog
 from Functions import *
 import vnakit
 
 ########################################################################################################################
-#global choosen_port  # Globale Variable ob single oder dual port
-#global which_single_port  # Globale Variable für den gewählten Port (A oder B)
+global choosen_port  # Globale Variable ob single oder dual port
+global which_single_port  # Globale Variable für den gewählten Port (A oder B)
 
 global open_s_param_A
 global short_s_param_A
@@ -14,11 +15,20 @@ global open_s_param_B
 global short_s_param_B
 global load_s_param_B
 global thru_s_param
-global choosen_port
+
 
 ########################################################################################################################
 
+def init_buttom_clicked():
 
+    try:
+        vnakit.Init()
+        init_button.config(bg=green)
+        print("Initialisierung abgeschlossen!")
+
+    except:
+        print("VNA-INIT fehlgeschlagen! Bitte überprüfen ob das Gerät angeschlossen ist")
+        init_button.config(bg=red)
 
 def cal_buttom_clicked(port_variable, portlist):
     global choosen_port
@@ -157,7 +167,7 @@ def ideal_clicked():
     global load_s_param_B
     global thru_s_param
 
-
+    freq_vec = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
 
     # @ Florian: Ideale S-Parameter Dateien müssen noch mit dem richtigen Inhalt befüllt werden
     open_s_param_A = hid.readSnP("pythonProject/src_Python/GUI/stds/Ideal_Open.s1p", freq_vec)
@@ -373,8 +383,6 @@ def one_port_cal(port, DUT):
     global load_s_param_B
     global thru_s_param
 
-    start, stop, NOP, RBW, power = get_input_settings(start_freq_input, end_freq_input, nop_input, rbw_input,
-                                                      power_input)
     if port == "A":
         settings, freq_vec = init(start, stop, NOP, RBW, power, ports['Tx1'], "VNAKIT_MODE_ONE_PORT")
         if DUT == "Open":
@@ -722,6 +730,10 @@ cal_plot_check = IntVar(value=0)
 checkbox_plot_cal = Checkbutton(root, text="Kalibrationsergebnisse plotten?", variable=cal_plot_check, font=text_short)
 
 insert_blank_line(root, 9, columns)
+
+init_button = Button(root, text="INIT.", font=text_normal, bg=red)
+init_button.config(command=lambda: init_buttom_clicked())
+init_button.grid(row=10, column=0, sticky=center)
 
 run_buttom = Button(root, text="Messung starten", font=text_normal, bg=green)
 run_buttom.config(command=lambda: run_button_clicked())
