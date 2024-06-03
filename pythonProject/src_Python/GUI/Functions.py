@@ -139,12 +139,6 @@ def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec, vnaki
     return s_param_roh, s_param_8_cor, s_param_12_cor
 
 
-def plot(freq_vec, S_param_meas, S_param, settings):
-    settings_str = ut.getSettingsStr(settings)
-    hid.plotCompareDb(freq_vec, [S_param_meas, S_param],
-                      ['Uncorrected', '12-term Corrected'], settings_str)
-
-
 def save_measurements(settings, freq_vec, s_param_roh, s_param_8, folder_path, file_name, vnakit):
     file_path = folder_path + "/" + file_name
 
