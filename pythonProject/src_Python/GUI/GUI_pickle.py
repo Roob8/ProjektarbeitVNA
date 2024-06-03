@@ -173,7 +173,7 @@ def run_button_clicked():
     global S_param_cor
     global S_param_dB
     global settings
-    global freq_vec
+    global freq_vec_Hz
     global ports
 
     output_folder_button.grid(row=12, column=1, sticky=center)
@@ -186,12 +186,12 @@ def run_button_clicked():
     cal_files = [open_s_param_A, short_s_param_A, load_s_param_A, open_s_param_B, short_s_param_B, load_s_param_B,
                  thru_s_param]
 
-    settings, freq_vec, ports = init(start_freq_input, end_freq_input, nop_input, rbw_input, power_input)
+    settings, freq_vec_Hz, ports = init(start_freq_input, end_freq_input, nop_input, rbw_input, power_input)
 
     single_dual = 2
     which_single_port = "Tx1"       # Text muss noch von GUI Eingabe übernommen werden
 
-    S_param_kompl, S_param_cor, S_param_dB = run_measurement(settings, single_dual, which_single_port, cal_files, ports, freq_vec)
+    S_param_kompl, S_param_cor, S_param_dB = run_measurement(settings, single_dual, which_single_port, cal_files, ports, freq_vec_Hz)
 
 
 def output_folder_button_clicked():
@@ -205,14 +205,14 @@ def output_folder_button_clicked():
 
 
 def save_button_clicked():
-    global freq_vec
+    global freq_vec_Hz
     global S_param_kompl
     global S_param_cor
     global folder_path
 
     file_name = name_input.get()
     # file_name = "Test"
-    save_measurements(freq_vec, S_param_kompl, S_param_cor, folder_path, file_name)
+    save_measurements(freq_vec_Hz, S_param_kompl, S_param_cor, folder_path, file_name)
 
 def get_path_open():
     global open_s_param_A

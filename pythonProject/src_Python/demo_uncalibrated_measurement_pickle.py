@@ -46,7 +46,7 @@ with open('Pickle/settings.pkl', 'rb') as file:     # Daten laden
 # freq_vec = np.array(vnakit.GetFreqVector_MHz())
 
 with open('Pickle/freq_vec.pkl', 'rb') as file:     # Daten laden
-    freq_vec = pickle.load(file)
+    freq_vec_Hz = pickle.load(file)
 
 print('The board is initialized with settings:\n')
 
@@ -65,14 +65,14 @@ with open('Pickle/rec_tx2.pkl', 'rb') as file:     # Daten laden
 
 # converting a/b waves to S-parameters
 s_param_kompl = ab2S(rec_tx1, rec_tx2, ports)
-s_param_dB = sKompl_2_sLog(s_param_kompl, freq_vec)
+s_param_dB = sKompl_2_sLog(s_param_kompl, freq_vec_Hz)
 
 save_measurements(settings, s_param_dB, 'Ausgaben', "DUT_meas")
 
 # a plot comparing the raw uncorrected measurement
 # to the corrected S-paramter measurement in Log-Magnitude
 fig, axes = plt.subplots(2,1)
-DUT = rf.Network(s=s_param_kompl, f=freq_vec, z0=50, f_unit='MHz')
+DUT = rf.Network(s=s_param_kompl, f=freq_vec_Hz, z0=50, f_unit='MHz')
 DUT.plot_s_db(ax=axes[0])
 DUT.plot_s_deg_unwrap(ax=axes[1])
 axes[0].set_title('Uncalibrated S-Parameter Measurement')

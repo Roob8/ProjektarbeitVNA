@@ -33,7 +33,7 @@ def loadGammaListed(sol_stds,freq_desired):
         gamma_listed: [num_pts,3] complex reflection coefficients of OSL in
                     order specified by sol_stds
     """
-    from vnakit_ex.hidden import readSnP
+    from hidden import readSnP
 
     gamma_listed = np.zeros((len(freq_desired),3),dtype=np.complex)
     for i in range(3):

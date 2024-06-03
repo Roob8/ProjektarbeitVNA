@@ -43,7 +43,7 @@ settings = vnakit.RecordingSettings(
 vnakit.ApplySettings(settings)
 
 # actual frequency vector used by the board
-freq_vec = np.array(vnakit.GetFreqVector_MHz())
+freq_vec_Hz = np.array(vnakit.GetFreqVector_MHz())
 print('The board is initialized with settings:\n')
 
 # gets a formatted string of the board's settings. See vnakit_ex/utils.py

@@ -54,12 +54,12 @@ rec = vnakit.GetRecordingResult()
 
 # Returns the frequency vector rounded
 # to the nearest allowable frequency point
-freq_vec = vnakit.GetFreqVector_MHz()
+freq_vec_Hz = vnakit.GetFreqVector_MHz()
 
 # Plot magnitude of Rx output
 print('Plotting...')
 plt.figure()
-plt.plot(freq_vec, np.abs(rec[rx_num]))
+plt.plot(freq_vec_Hz, np.abs(rec[rx_num]))
 plt.title('wavy.py')
 plt.xlabel('Frequency (MHz)')
 plt.ylabel('Magnitude')

@@ -37,7 +37,7 @@ settings = vnakit.RecordingSettings(
 vnakit.ApplySettings(settings)
 
 # actual frequency vector used by the board
-freq_vec = np.array(vnakit.GetFreqVector_MHz())
+freq_vec_Hz = np.array(vnakit.GetFreqVector_MHz())
 print('The board is initialized with settings:\n')
 
 # gets a formatted string of the board's settings. See vnakit_ex/utils.py
@@ -52,12 +52,12 @@ print('Done.\n')
 # converting a/b waves to S-parameters
 S_param_meas = ab2S(rec_tx1, rec_tx2, ports)
 
-SParam_to_ecxel(settings, freq_vec, S_param_meas)
+SParam_to_ecxel(settings, freq_vec_Hz, S_param_meas)
 
 # a plot comparing the raw uncorrected measurement
 # to the corrected S-paramter measurement in Log-Magnitude
 fig, axes = plt.subplots(2,1)
-DUT = rf.Network(s=S_param_meas, f=freq_vec, z0=50, f_unit='MHz')
+DUT = rf.Network(s=S_param_meas, f=freq_vec_Hz, z0=50, f_unit='MHz')
 DUT.plot_s_db(ax=axes[0])
 DUT.plot_s_deg_unwrap(ax=axes[1])
 axes[0].set_title('Uncalibrated S-Parameter Measurement')
