@@ -5,8 +5,7 @@ from Functions import *
 import vnakit
 
 ########################################################################################################################
-global choosen_port  # Globale Variable ob single oder dual port
-global which_single_port  # Globale Variable für den gewählten Port (A oder B)
+global choosen_single_port_global
 
 global open_s_param_A
 global short_s_param_A
@@ -23,17 +22,6 @@ global s_param_8_term
 ########################################################################################################################
 
 def init_buttom_clicked():
-
-    try:
-        vnakit.Init()
-        init_button.config(bg=green)
-        print("Initialisierung abgeschlossen!")
-
-    except:
-        print("VNA-INIT fehlgeschlagen! Bitte überprüfen ob das Gerät angeschlossen ist")
-        init_button.config(bg=red)
-
-def cal_buttom_clicked(port_variable, portlist):
     global open_s_param_A
     global short_s_param_A
     global load_s_param_A
@@ -41,25 +29,41 @@ def cal_buttom_clicked(port_variable, portlist):
     global short_s_param_B
     global load_s_param_B
     global thru_s_param
-    global choosen_port
-    global which_single_port
-    global cal_s_param
 
-    own_meas.grid(row=7, column=0, sticky=center)
-    s_meas.grid(row=7, column=2, sticky=center)
-    ideal_meas.grid(row=7, column=4, sticky=center)
-    checkbox_plot_cal.grid(row=9, column=columns - 1, sticky=right)
 
-    portlist_index = portlist.curselection()
-    which_single_port = portlist.get(portlist_index)    # Port A = 'A', Port B = 'B'
-    choosen_port = port_variable.get()                  # 1 = Single, 2 = Dual
+    own_meas.grid(row=8, column=0, sticky=center)
+    s_meas.grid(row=8, column=2, sticky=center)
+    ideal_meas.grid(row=8, column=4, sticky=center)
+    run_buttom.grid(row=10, column=1, columnspan=3, sticky=center)
 
-    freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
+    try:
+        vnakit.Init()
 
-    open_s_param_A, open_s_param_B, load_s_param_A, load_s_param_B, short_s_param_A, short_s_param_B, thru_s_param = get_ideal_s_params(freq_vec_Hz)
+        freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
+        open_s_param_A, open_s_param_B, load_s_param_A, load_s_param_B, short_s_param_A, short_s_param_B, thru_s_param = get_ideal_s_params(
+            freq_vec_Hz)
 
+        # eventuell schon beim initialisieren, die eingegebenen Werte aif Plausibilität überprüfen
+
+        ''' Muss am Ende hier rein --> nur zum Ausprobieren steht es weiter oben
+        own_meas.grid(row=8, column=0, sticky=center)
+        s_meas.grid(row=8, column=2, sticky=center)
+        ideal_meas.grid(row=8, column=4, sticky=center)
+        run_buttom.grid(row=10, column=1, columnspan=3, sticky=center)
+        '''
+
+        init_button.config(bg=green)
+        print("Initialisierung abgeschlossen!")
+
+    except:
+        print("VNA-INIT fehlgeschlagen! Bitte überprüfen ob das Gerät angeschlossen ist")
+        init_button.config(bg=red)
 
 def own_meas_clicked():
+    global choosen_single_port_global
+
+    choosen_single_port = get_choosen_single_port(portlist)
+    choosen_single_port_global = choosen_single_port
 
     path_open_output.config(state="normal")
     path_open_output.delete("1.0", "end")
@@ -101,30 +105,48 @@ def own_meas_clicked():
     path_thru_output.delete("1.0", "end")
     path_thru_output.config(state="disabled")
 
-    if choosen_port_internal.get() == 1:
+    if dual_or_single_port.get() == 1:
         dual_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
         dual_port_frame_s.grid_remove()
-        single_port_frame_own.grid(row=8, column=1, columnspan=columns, sticky=left)
-    if choosen_port_internal.get() == 2:
+        single_port_frame_own.grid(row=9, column=1, columnspan=columns, sticky=left)
+        if choosen_single_port == "A":
+            port_B_anzeige.grid_remove()
+            port_A_anzeige.grid(row=9, column=0, sticky=center)
+        elif choosen_single_port == "B":
+            port_A_anzeige.grid_remove()
+            port_B_anzeige.grid(row=9, column=0, sticky=center)
+
+    if dual_or_single_port.get() == 2:
         single_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
         dual_port_frame_s.grid_remove()
-        dual_port_frame_own.grid(row=8, column=1, columnspan=columns, sticky=left)
+        port_A_anzeige.grid_remove()
+        port_B_anzeige.grid_remove()
+        dual_port_frame_own.grid(row=9, column=1, columnspan=columns, sticky=left)
 
 
 def s_param_clicked():
+    choosen_single_port = get_choosen_single_port(portlist)
 
-    if choosen_port_internal.get() == 1:
+    if dual_or_single_port.get() == 1:
         dual_port_frame_own.grid_remove()
         single_port_frame_own.grid_remove()
         dual_port_frame_s.grid_remove()
-        single_port_frame_s.grid(row=8, column=1, columnspan=columns, sticky=left)
-    if choosen_port_internal.get() == 2:
+        single_port_frame_s.grid(row=9, column=1, columnspan=columns, sticky=left)
+        if choosen_single_port == "A":
+            port_B_anzeige.grid_remove()
+            port_A_anzeige.grid(row=9, column=0, sticky=center)
+        elif choosen_single_port == "B":
+            port_A_anzeige.grid_remove()
+            port_B_anzeige.grid(row=9, column=0, sticky=center)
+    if dual_or_single_port.get() == 2:
         dual_port_frame_own.grid_remove()
         single_port_frame_own.grid_remove()
         single_port_frame_s.grid_remove()
-        dual_port_frame_s.grid(row=8, column=0, columnspan=columns, sticky=left)
+        port_A_anzeige.grid_remove()
+        port_B_anzeige.grid_remove()
+        dual_port_frame_s.grid(row=9, column=0, columnspan=columns, sticky=left)
 
 
 def ideal_clicked():
@@ -132,6 +154,8 @@ def ideal_clicked():
     single_port_frame_own.grid_remove()
     dual_port_frame_s.grid_remove()
     single_port_frame_s.grid_remove()
+    port_A_anzeige.grid_remove()
+    port_B_anzeige.grid_remove()
 
     path_open_output.config(state="normal")
     path_open_output.delete("1.0", "end")
@@ -207,16 +231,18 @@ def run_button_clicked():
 
     settings = get_settings(start_freq_input,end_freq_input,nop_input,rbw_input,power_input,vnakit)
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
+    choosen_single_port = get_choosen_single_port(portlist)
+    dual_or_single = dual_or_single_port.get()
 
     cal_files = [open_s_param_A, short_s_param_A, load_s_param_A, open_s_param_B, short_s_param_B, load_s_param_B,
                  thru_s_param]
 
-    if which_single_port == "A":
+    if choosen_single_port == "A":
         tx = "Tx1"
-    elif which_single_port == "B":
+    elif choosen_single_port == "B":
         tx = "Tx2"
 
-    s_param_roh, s_param_8_term, s_param_12_term = run_measurement(settings, choosen_port, tx, cal_files, ports, freq_vec_Hz, vnakit)
+    s_param_roh, s_param_8_term, s_param_12_term = run_measurement(settings, dual_or_single, tx, cal_files, ports, freq_vec_Hz, vnakit)
 
 def output_folder_button_clicked():
     global folder_path
@@ -245,6 +271,7 @@ def get_path_open():
     global open_s_param_B
 
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
+    choosen_single_port = get_choosen_single_port(portlist)
 
     path_open = filedialog.askopenfilename()
     path_open_output.config(state="normal")
@@ -252,10 +279,10 @@ def get_path_open():
     path_open_output.insert("1.0", path_open)
     path_open_output.config(state="disabled")
 
-    if which_single_port == "A":
+    if choosen_single_port == "A":
         open_s_param_A = load_sparam(freq_vec_Hz, path_open)
         print("done")
-    elif which_single_port == "B":
+    elif choosen_single_port == "B":
         open_s_param_B = load_sparam(freq_vec_Hz, path_open)
         print("done")
 
@@ -264,6 +291,7 @@ def get_path_short():
     global short_s_param_B
 
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
+    choosen_single_port = get_choosen_single_port(portlist)
 
     path_short = filedialog.askopenfilename()
     path_short_output.config(state="normal")
@@ -271,9 +299,9 @@ def get_path_short():
     path_short_output.insert("1.0", path_short)
     path_short_output.config(state="disabled")
 
-    if which_single_port == "A":
+    if choosen_single_port == "A":
         short_s_param_A = load_sparam(freq_vec_Hz, path_short)
-    elif which_single_port == "B":
+    elif choosen_single_port == "B":
         short_s_param_B = load_sparam(freq_vec_Hz, path_short)
 
 
@@ -282,6 +310,7 @@ def get_path_load():
     global load_s_param_B
 
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
+    choosen_single_port = get_choosen_single_port(portlist)
 
     path_load = filedialog.askopenfilename()
     path_load_output.config(state="normal")
@@ -289,9 +318,9 @@ def get_path_load():
     path_load_output.insert("1.0", path_load)
     path_load_output.config(state="disabled")
 
-    if which_single_port == "A":
+    if choosen_single_port == "A":
         load_s_param_A = load_sparam(freq_vec_Hz, path_load)
-    elif which_single_port == "B":
+    elif choosen_single_port == "B":
         load_s_param_B = load_sparam(freq_vec_Hz, path_load)
 
 
@@ -413,7 +442,7 @@ columns = 5
 root = Tk()
 ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
 
-choosen_port_internal = IntVar(value=2)     # Dual ist ausgewählt
+dual_or_single_port = IntVar(value=2)     # Dual ist ausgewählt
 channel_cal_method = IntVar(value=3)        # Ideale Kalibration ist ausgewählt
 
 root.title("Network Analyzer GUI")
@@ -471,20 +500,18 @@ portlist.insert("end", "B")
 portlist.select_set(0)
 portlist.grid(row=4, column=3, sticky=center)
 
-single_port_check = Radiobutton(root, text="Single Port", font=text_normal, variable=choosen_port_internal, value=1)
+single_port_check = Radiobutton(root, text="Single Port", font=text_normal, variable=dual_or_single_port, value=1)
 single_port_check.grid(row=4, column=2, sticky=center)
 
-dual_port_check = Radiobutton(root, text="Dual Port", font=text_normal, variable=choosen_port_internal, value=2)
+dual_port_check = Radiobutton(root, text="Dual Port", font=text_normal, variable=dual_or_single_port, value=2)
 dual_port_check.grid(row=4, column=4, sticky=center)
 
-insert_blank_line(root, 6, columns)
-
-open_cal_button = Button(root, text="Kalibrationsauswahl öffnen/aktualisieren", font=text_normal)
-open_cal_button.config(command=lambda: cal_buttom_clicked(choosen_port_internal, portlist))
-open_cal_button.grid(row=5, column=0, columnspan=2, sticky=left)
+insert_blank_line(root, 5, columns)
 
 own_meas = Radiobutton(root, text="Eigene Messung Starten", font=text_normal, variable=channel_cal_method, value=1)
 own_meas.config(command=lambda: own_meas_clicked())
+port_A_anzeige = Label(root, text="Port A", font=text_normal)
+port_B_anzeige = Label(root, text="Port B", font=text_normal)
 
 s_meas = Radiobutton(root, text="S-Parameter wählen", font=text_normal, variable=channel_cal_method, value=2)
 s_meas.config(command=lambda: s_param_clicked())
@@ -493,6 +520,7 @@ ideal_meas = Radiobutton(root, text="Ideale Kalibrierung nutzen", font=text_norm
                          value=3)
 ideal_meas.config(command=lambda: ideal_clicked())
 
+
 ########################################################################################################################
 
 single_port_frame_own = Frame(root)
@@ -500,15 +528,15 @@ for i in range(columns):
     single_port_frame_own.columnconfigure(i, weight=1)
 
 open_meas = Button(single_port_frame_own, text="Open messen", font=text_normal)
-open_meas.config(command=lambda: cal_port_measure(which_single_port, "Open"))
+open_meas.config(command=lambda: cal_port_measure(choosen_single_port_global, "Open"))
 open_meas.grid(row=0, column=0, sticky=center)
 
 short_meas = Button(single_port_frame_own, text="Short messen", font=text_normal)
-short_meas.config(command=lambda: cal_port_measure(which_single_port, "Short"))
+short_meas.config(command=lambda: cal_port_measure(choosen_single_port_global, "Short"))
 short_meas.grid(row=1, column=0, sticky=center)
 
 load_meas = Button(single_port_frame_own, text="Load messen", font=text_normal)
-load_meas.config(command=lambda: cal_port_measure(which_single_port, "Load"))
+load_meas.config(command=lambda: cal_port_measure(choosen_single_port_global, "Load"))
 load_meas.grid(row=2, column=0, sticky=center)
 
 ########################################################################################################################
@@ -676,20 +704,16 @@ path_thru_output.config(xscrollcommand=scrollbar_thru.set)
 
 ########################################################################################################################
 
-cal_plot_check = IntVar(value=0)
-checkbox_plot_cal = Checkbutton(root, text="Kalibrationsergebnisse plotten?", variable=cal_plot_check, font=text_short)
-
-insert_blank_line(root, 9, columns)
+insert_blank_line(root, 7, columns)
 
 init_button = Button(root, text="INIT.", font=text_normal, bg=red)
 init_button.config(command=lambda: init_buttom_clicked())
-init_button.grid(row=10, column=0, sticky=center)
+init_button.grid(row=6, column=1, columnspan=3, sticky=center)
 
 run_buttom = Button(root, text="Messung starten", font=text_normal, bg=green)
 run_buttom.config(command=lambda: run_button_clicked())
-run_buttom.grid(row=10, column=1, columnspan=3, sticky=center)
 
-insert_blank_line(root, 11, columns)
+insert_blank_line(root, 9, columns)
 
 output_folder_button = Button(root, text="Ausgabeordner wählen", font=text_normal)
 output_folder_button.config(command=lambda: output_folder_button_clicked())
