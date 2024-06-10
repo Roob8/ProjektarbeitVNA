@@ -262,9 +262,10 @@ def save_button_clicked():
 
     freq_vec = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     settings = get_settings(start_freq_input, end_freq_input, nop_input, rbw_input, power_input, vnakit)
+    dual_or_single = dual_or_single_port.get()
 
     file_name = name_input.get()
-    save_measurements(settings, freq_vec, s_param_roh, s_param_8_term, folder_path, file_name, vnakit)
+    save_measurements(settings, freq_vec, s_param_roh, s_param_8_term, folder_path, file_name, dual_or_single, vnakit)
 
 def get_path_open():
     global open_s_param_A
