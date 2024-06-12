@@ -74,45 +74,48 @@ def get_ideal_s_params(freq_vec):
     return open_s_param_A, open_s_param_B, load_s_param_A, load_s_param_B, short_s_param_A, short_s_param_B, thru_s_param
 
 
-def calibration_8_term(s_param_meas, freq_vec, cal_files):
+def calibration_8_term(s_param_meas, freq_vec_Hz, cal_files):
     # filenames of the open, short, load standards
     sol_stds = ['stds/open.S1P', 'stds/short.S1P', 'stds/load.S1P']
 
     # puts the reflection coefficents of the SOL standards in single array.
     # Also interpolates in frequency. See vnakit_ex/utils.py
-    gamma_listed = ut.loadGammaListed(sol_stds, freq_vec * 1e6)
+    gamma_listed = ut.loadGammaListed(sol_stds, freq_vec_Hz)
 
     # loads S-parameter data of the thru standard, interpolates frequency
-    thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec * 1e6)
+    thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec_Hz)
 
-    gamma_meas_p1 = open_s_param_A, short_s_param_A, load_s_param_A
-    gamma_meas_p2 = open_s_param_B, short_s_param_B, load_s_param_B
+    # Gm1: [num_pts,3] port 1 measured reflection coefficients in order OSL
+    gamma_meas_p1 = np.array(cal_files[0:3]).T
+    gamma_meas_p2 = np.array(cal_files[3:6]).T
+    Thru_meas = np.array(cal_files[6])
 
-    (fwd_terms, rev_terms) = hid.get8TermModel(gamma_listed, gamma_meas_p1,
-                                               gamma_listed, gamma_meas_p2, thru_listed, thru_s_param)
+    (A,B,q) = hid.get8TermModel(gamma_listed, gamma_meas_p1,
+                                               gamma_listed, gamma_meas_p2, thru_listed, Thru_meas)
     # calibration is now complete (by having obtained the error terms)
 
     # applying error correction with the error terms
     print('Applying 8-Term Model Correction...')
-    return hid.correct8Term(s_param_meas, fwd_terms, rev_terms)
+    return hid.correct8Term(s_param_meas, A,B,q)
 
 
-def calibration_12_term(s_param_meas, freq_vec, cal_files):
+def calibration_12_term(s_param_meas, freq_vec_Hz, cal_files):
     # filenames of the open, short, load standards
     sol_stds = ['stds/open.S1P', 'stds/short.S1P', 'stds/load.S1P']
 
     # puts the reflection coefficents of the SOL standards in single array.
     # Also interpolates in frequency. See vnakit_ex/utils.py
-    gamma_listed = ut.loadGammaListed(sol_stds, freq_vec * 1e6)
+    gamma_listed = ut.loadGammaListed(sol_stds, freq_vec_Hz)
 
     # loads S-parameter data of the thru standard, interpolates frequency
-    thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec * 1e6)
+    thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec_Hz)
 
-    gamma_meas_p1 = open_s_param_A, short_s_param_A, load_s_param_A
-    gamma_meas_p2 = open_s_param_B, short_s_param_B, load_s_param_B
+    gamma_meas_p1 = np.array(cal_files[0:3]).T
+    gamma_meas_p2 = np.array(cal_files[3:6]).T
+    thru_meas = np.array(cal_files[6])
 
     (fwd_terms, rev_terms) = hid.get12TermModel(gamma_listed, gamma_meas_p1,
-                                                gamma_listed, gamma_meas_p2, thru_listed, thru_s_param)
+                                                gamma_listed, gamma_meas_p2, thru_listed, thru_meas)
     # calibration is now complete (by having obtained the error terms)
 
     # applying error correction with the error terms
@@ -148,15 +151,16 @@ def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec_Hz, vn
 
     # measure S-parameters
     if single_dual == 1:  # single port measurement
-        s_param_roh = single_measurement(vnakit, settings, tx, ports, freq_vec)
+        s_param_roh = single_measurement(vnakit, settings, tx, ports)
 
     elif single_dual == 2:  # dual port measurement
         # measure S-parameters
         s_param_roh = dual_measurement(vnakit, settings, ports)
 
         # applying error correction with the error terms
-        s_param_8_term = calibration_8_term(s_param_meas, freq_vec, cal_files)
-        s_param_12_term = calibration_12_term(s_param_meas, freq_vec, cal_files)
+        s_param_12_term = calibration_12_term(s_param_roh, freq_vec_Hz, cal_files)
+        s_param_8_term = calibration_8_term(s_param_roh, freq_vec_Hz, cal_files)
+
 
     else:
         print("Wrong measurement parameter")
@@ -166,19 +170,17 @@ def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec_Hz, vn
     return s_param_roh, s_param_8_term, s_param_12_term
 
 
-def save_measurements(settings, freq_vec, s_param_roh, s_param_8, folder_path, file_name, dual_single, vnakit):
+def save_measurements(settings, freq_vec_Hz, s_param_roh, s_param_8, s_param_12, folder_path, file_name, dual_single, vnakit):
     file_path = folder_path + "/" + file_name
-
+    freq_vec_MHz = freq_vec_Hz/1000000
     # store measurement in touchstone files
     if dual_single == 1:  # single port measurement
-        # hid.writeSnP(freq_vec, s_param_kompl, file_path + "_uncorrected.S1P", freq_unit='MHz')
-        hid.writeSnP(freq_vec, s_param_meas, file_path + "_uncorrected.S1P", freq_unit='MHz')
-        #   hid.writeSnP(freq_vec, S_param_cor, file_path + ".S1P", freq_unit='MHz')
+        hid.writeSnP(freq_vec_MHz, s_param_roh, file_path + "_uncorrected.S1P", freq_unit='MHz')
 
     if dual_single == 2:  # dual port measurement
-        hid.writeSnP(freq_vec, s_param_meas, file_path + "_uncorrected.S2P", freq_unit='MHz')
-        hid.writeSnP(freq_vec, s_param_8term, file_path + "_8Term.S2P", freq_unit='MHz')
-        hid.writeSnP(freq_vec, s_param_12term, file_path + "_12Term.S2P", freq_unit='MHz')
+        hid.writeSnP(freq_vec_MHz, s_param_roh, file_path + "_uncorrected.S2P", freq_unit='MHz')
+        hid.writeSnP(freq_vec_MHz, s_param_8, file_path + "_8Term.S2P", freq_unit='MHz')
+        hid.writeSnP(freq_vec_MHz, s_param_12, file_path + "_12Term.S2P", freq_unit='MHz')
 
     # store measurement in Excel file_path
     setup = []
@@ -202,17 +204,17 @@ def save_measurements(settings, freq_vec, s_param_roh, s_param_8, folder_path, f
         setup.append("")
 
     for x in range(len(freq)):
-        S11_Betrag.append(20 * math.log10(np.abs(s_param_meas[x][0][0])))
-        S11_Phase.append(np.angle(s_param_meas[x][0][0], deg=True))
+        S11_Betrag.append(20 * math.log10(np.abs(s_param_roh[x][0][0])))
+        S11_Phase.append(np.angle(s_param_roh[x][0][0], deg=True))
 
-        S21_Betrag.append(20 * math.log10(np.abs(s_param_meas[x][1][0])))
-        S21_Phase.append(np.angle(s_param_meas[x][1][0], deg=True))
+        S21_Betrag.append(20 * math.log10(np.abs(s_param_roh[x][1][0])))
+        S21_Phase.append(np.angle(s_param_roh[x][1][0], deg=True))
 
-        S12_Betrag.append(20 * math.log10(np.abs(s_param_meas[x][0][1])))
-        S12_Phase.append(np.angle(s_param_meas[x][0][1], deg=True))
+        S12_Betrag.append(20 * math.log10(np.abs(s_param_roh[x][0][1])))
+        S12_Phase.append(np.angle(s_param_roh[x][0][1], deg=True))
 
-        S22_Betrag.append(20 * math.log10(np.abs(s_param_meas[x][1][1])))
-        S22_Phase.append(np.angle(s_param_meas[x][1][1], deg=True))
+        S22_Betrag.append(20 * math.log10(np.abs(s_param_roh[x][1][1])))
+        S22_Phase.append(np.angle(s_param_roh[x][1][1], deg=True))
 
     df1 = pd.DataFrame(data={"Setup": setup, "Frequenz": freq,
                              "S11 Betrag": S11_Betrag, "S11 Phase": S11_Phase,
@@ -220,17 +222,63 @@ def save_measurements(settings, freq_vec, s_param_roh, s_param_8, folder_path, f
                              "S12 Betrag": S21_Betrag, "S12 Phase": S21_Phase,
                              "S22 Betrag": S22_Betrag, "S22 Phase": S22_Phase})
 
-    # df2 = pd.DataFrame(data={"Setup": setup, "Frequenz": freq,
-    #                          "S11 Betrag": s_param_8term[0][0], "S11 Phase": s_param_8term[0][0],
-    #                          "S21 Betrag": S21_Betrag, "S21 Phase": S21_Phase,
-    #                          "S12 Betrag": S21_Betrag, "S12 Phase": S21_Phase,
-    #                          "S22 Betrag": S22_Betrag, "S22 Phase": S22_Phase})
-    #
-    # df3 = pd.DataFrame(data={"Setup": setup, "Frequenz": freq,
-    #                          "S11 Betrag": S11_Betrag, "S11 Phase": S11_Phase,
-    #                          "S21 Betrag": S21_Betrag, "S21 Phase": S21_Phase,
-    #                          "S12 Betrag": S21_Betrag, "S12 Phase": S21_Phase,
-    #                          "S22 Betrag": S22_Betrag, "S22 Phase": S22_Phase})
+    # Create DataFrames for s_param_8
+    S11_Betrag_8 = []
+    S11_Phase_8 = []
+    S21_Betrag_8 = []
+    S21_Phase_8 = []
+    S12_Betrag_8 = []
+    S12_Phase_8 = []
+    S22_Betrag_8 = []
+    S22_Phase_8 = []
+
+    for x in range(len(freq)):
+        S11_Betrag_8.append(20 * math.log10(np.abs(s_param_8[x][0][0])))
+        S11_Phase_8.append(np.angle(s_param_8[x][0][0], deg=True))
+
+        S21_Betrag_8.append(20 * math.log10(np.abs(s_param_8[x][1][0])))
+        S21_Phase_8.append(np.angle(s_param_8[x][1][0], deg=True))
+
+        S12_Betrag_8.append(20 * math.log10(np.abs(s_param_8[x][0][1])))
+        S12_Phase_8.append(np.angle(s_param_8[x][0][1], deg=True))
+
+        S22_Betrag_8.append(20 * math.log10(np.abs(s_param_8[x][1][1])))
+        S22_Phase_8.append(np.angle(s_param_8[x][1][1], deg=True))
+
+    df2 = pd.DataFrame(data={"Setup": setup, "Frequenz": freq,
+                             "S11 Betrag": S11_Betrag_8, "S11 Phase": S11_Phase_8,
+                             "S21 Betrag": S21_Betrag_8, "S21 Phase": S21_Phase_8,
+                             "S12 Betrag": S12_Betrag_8, "S12 Phase": S12_Phase_8,
+                             "S22 Betrag": S22_Betrag_8, "S22 Phase": S22_Phase_8})
+
+    # Create DataFrames for s_param_8
+    S11_Betrag_12 = []
+    S11_Phase_12 = []
+    S21_Betrag_12 = []
+    S21_Phase_12 = []
+    S12_Betrag_12 = []
+    S12_Phase_12 = []
+    S22_Betrag_12 = []
+    S22_Phase_12 = []
+
+    for x in range(len(freq)):
+        S11_Betrag_12.append(20 * math.log10(np.abs(s_param_12[x][0][0])))
+        S11_Phase_12.append(np.angle(s_param_12[x][0][0], deg=True))
+
+        S21_Betrag_12.append(20 * math.log10(np.abs(s_param_12[x][1][0])))
+        S21_Phase_12.append(np.angle(s_param_12[x][1][0], deg=True))
+
+        S12_Betrag_12.append(20 * math.log10(np.abs(s_param_12[x][0][1])))
+        S12_Phase_12.append(np.angle(s_param_12[x][0][1], deg=True))
+
+        S22_Betrag_12.append(20 * math.log10(np.abs(s_param_12[x][1][1])))
+        S22_Phase_12.append(np.angle(s_param_12[x][1][1], deg=True))
+
+    df3 = pd.DataFrame(data={"Setup": setup, "Frequenz": freq,
+                             "S11 Betrag": S11_Betrag_12, "S11 Phase": S11_Phase_12,
+                             "S21 Betrag": S21_Betrag_12, "S21 Phase": S21_Phase_12,
+                             "S12 Betrag": S12_Betrag_12, "S12 Phase": S12_Phase_12,
+                             "S22 Betrag": S22_Betrag_12, "S22 Phase": S22_Phase_12})
 
     # "Ausgaben" Ordner erzeugen
     subfolder_path = Path(folder_path)
@@ -241,8 +289,8 @@ def save_measurements(settings, freq_vec, s_param_roh, s_param_8, folder_path, f
 
     with pd.ExcelWriter(file_path + ".xlsx") as writer:
         df1.to_excel(writer, sheet_name='Uncorrect', index=False)
-        # df2.to_excel(writer, sheet_name='8-Term', index=False)
-        # df3.to_excel(writer, sheet_name='12-Term', index=False)
+        df2.to_excel(writer, sheet_name='8-Term', index=False)
+        df3.to_excel(writer, sheet_name='12-Term', index=False)
 
     print("Save measurements done!")
 
