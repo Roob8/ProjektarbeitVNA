@@ -455,7 +455,7 @@ root.geometry("%dx%d" % (x_size, y_size))
 for i in range(columns):
     root.columnconfigure(i, weight=1)
 
-headline = Label(root, text="Grafische Umgebung für die Verwendung des Network Analyzers", font=header_bold_underline)
+headline = Label(root, text="Grafische Umgebung für die Verwendung des UVNA-63", font=header_bold_underline)
 headline.grid(row=0, column=0, columnspan=columns, sticky=center)
 
 insert_blank_line(root, 1, columns)
