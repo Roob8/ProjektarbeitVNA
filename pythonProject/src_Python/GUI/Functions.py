@@ -125,11 +125,11 @@ def calibration_12_term(s_param_meas, freq_vec_Hz, cal_files):
 
 def single_measurement(vnakit, settings, tx, ports):
 
-    rec_tx1 = hid.measure1Port(vnakit, settings, tx)
+    rec_tx1 = hid.measure1Port(vnakit, settings, ports[tx])
 
-    if tx == ports['Tx1']:
+    if tx == 'Tx1':
         s_params = np.array(rec_tx1[ports['Rx1B']])/np.array(rec_tx1[ports['Rx1A']])
-    elif tx == ports['Tx2']:
+    elif tx == 'Tx2':
         s_params = np.array(rec_tx1[ports['Rx2B']]) / np.array(rec_tx1[ports['Rx2A']])
 
     return s_params
@@ -151,9 +151,13 @@ def load_sparam(freq_vec, path):
 
 def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec_Hz, vnakit):
 
-    # measure S-parameters
     if single_dual == 1:  # single port measurement
+        # measure S-parameters
         s_param_roh = single_measurement(vnakit, settings, tx, ports)
+
+        # applying error correction with the error terms
+        s_param_12_term = calibration_12_term(s_param_roh, freq_vec_Hz, cal_files)
+        s_param_8_term = calibration_8_term(s_param_roh, freq_vec_Hz, cal_files)
 
     elif single_dual == 2:  # dual port measurement
         # measure S-parameters
