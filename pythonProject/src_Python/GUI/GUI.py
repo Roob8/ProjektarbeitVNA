@@ -31,10 +31,6 @@ def init_buttom_clicked():
     global thru_s_param
 
 
-    own_meas.grid(row=8, column=0, sticky=center)
-    s_meas.grid(row=8, column=2, sticky=center)
-    ideal_meas.grid(row=8, column=4, sticky=center)
-    run_buttom.grid(row=10, column=1, columnspan=3, sticky=center)
 
     try:
         vnakit.Init()
@@ -45,12 +41,10 @@ def init_buttom_clicked():
 
         # eventuell schon beim initialisieren, die eingegebenen Werte aif Plausibilität überprüfen
 
-        ''' Muss am Ende hier rein --> nur zum Ausprobieren steht es weiter oben
         own_meas.grid(row=8, column=0, sticky=center)
         s_meas.grid(row=8, column=2, sticky=center)
         ideal_meas.grid(row=8, column=4, sticky=center)
         run_buttom.grid(row=10, column=1, columnspan=3, sticky=center)
-        '''
 
         init_button.config(bg=green)
         print("Initialisierung abgeschlossen!")

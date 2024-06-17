@@ -126,9 +126,11 @@ def calibration_12_term(s_param_meas, freq_vec_Hz, cal_files):
 def single_measurement(vnakit, settings, tx, ports):
 
     rec_tx1 = hid.measure1Port(vnakit, settings, tx)
-    # converting a/b waves to S-parameters
-    rec_tx2 = rec_tx1
-    s_params = hid.ab2S(rec_tx1, rec_tx2, ports)
+
+    if tx == ports['Tx1']:
+        s_params = np.array(rec_tx1[ports['Rx1B']])/np.array(rec_tx1[ports['Rx1A']])
+    elif tx == ports['Tx2']:
+        s_params = np.array(rec_tx1[ports['Rx2B']]) / np.array(rec_tx1[ports['Rx2A']])
 
     return s_params
 
