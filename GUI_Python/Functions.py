@@ -8,7 +8,13 @@ import utils as ut
 import skrf as rf
 import matplotlib.pyplot as plt
 
-def plot_meas(s_param_roh, s_param_8_term, s_param_12_term, freq_vec_Hz):
+def plot_meas(s_param_roh, s_param_8_term, s_param_12_term, settings, freq_vec_Hz):
+
+    setting_str =   'Freq. Range: '+str(settings.freqRange.freqStartMHz)+' - '+ \
+                                    str(settings.freqRange.freqStopMHz)+' [MHz]     ' + \
+                    'Num. Points: '+str(settings.freqRange.numFreqPoints)+' [pts]       ' + \
+                    'Output Power: '+str(settings.outputPower_dbm)+' [dBm]       ' + \
+                    'Res. Bandwidth: '+str(settings.rbw_khz)+' [kHz]'
 
     fig, axes = plt.subplots(1, 3)
     DUT_roh = rf.Network(s=s_param_roh, f=freq_vec_Hz / 1e6, z0=50, f_unit='MHz')
@@ -22,6 +28,8 @@ def plot_meas(s_param_roh, s_param_8_term, s_param_12_term, freq_vec_Hz):
     DUT_12_term = rf.Network(s=s_param_12_term, f=freq_vec_Hz / 1e6, z0=50, f_unit='MHz')
     DUT_12_term.plot_s_db(ax=axes[2])
     axes[2].set_title('S-Parameter nach 12-term-Correction')
+
+    plt.suptitle(setting_str)
     plt.show()
 
 def get_choosen_single_port(portauswahl):
@@ -63,27 +71,27 @@ def get_settings(start, stop, NOP, RBW, power, vnakit):
 def get_ideal_s_params(freq_vec):
 
     # @ Florian: Ideale S-Parameter Dateien müssen noch mit dem richtigen Inhalt befüllt werden
-    open_s_param_A = hid.readSnP("stds/open.S1P", freq_vec)
-    short_s_param_A = hid.readSnP("stds/short.S1P", freq_vec)
-    load_s_param_A = hid.readSnP("stds/load.S1P", freq_vec)
-    open_s_param_B = hid.readSnP("stds/open.S1P", freq_vec)
-    short_s_param_B = hid.readSnP("stds/short.S1P", freq_vec)
-    load_s_param_B = hid.readSnP("stds/load.S1P", freq_vec)
-    thru_s_param = hid.readSnP("stds/thru.S2P", freq_vec)
+    open_s_param_A = hid.readSnP("cal_files_VNA/open.S1P", freq_vec)
+    short_s_param_A = hid.readSnP("cal_files_VNA/short.S1P", freq_vec)
+    load_s_param_A = hid.readSnP("cal_files_VNA/load.S1P", freq_vec)
+    open_s_param_B = hid.readSnP("cal_files_VNA/open.S1P", freq_vec)
+    short_s_param_B = hid.readSnP("cal_files_VNA/short.S1P", freq_vec)
+    load_s_param_B = hid.readSnP("cal_files_VNA/load.S1P", freq_vec)
+    thru_s_param = hid.readSnP("cal_files_VNA/thru.S2P", freq_vec)
 
     return open_s_param_A, open_s_param_B, load_s_param_A, load_s_param_B, short_s_param_A, short_s_param_B, thru_s_param
 
 
 def calibration_8_term(s_param_meas, freq_vec_Hz, cal_files):
     # filenames of the open, short, load standards
-    sol_stds = ['stds/open.S1P', 'stds/short.S1P', 'stds/load.S1P']
+    sol_stds = ['stds_Measure/open.S1P', 'stds_Measure/short.S1P', 'stds_Measure/load.S1P']
 
     # puts the reflection coefficents of the SOL standards in single array.
     # Also interpolates in frequency. See vnakit_ex/utils.py
     gamma_listed = ut.loadGammaListed(sol_stds, freq_vec_Hz)
 
     # loads S-parameter data of the thru standard, interpolates frequency
-    thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec_Hz)
+    thru_listed = hid.readSnP('stds_Measure/thru.S2P', freq_desired=freq_vec_Hz)
 
     # Gm1: [num_pts,3] port 1 measured reflection coefficients in order OSL
     gamma_meas_p1 = np.array(cal_files[0:3]).T
@@ -101,14 +109,16 @@ def calibration_8_term(s_param_meas, freq_vec_Hz, cal_files):
 
 def calibration_12_term(s_param_meas, freq_vec_Hz, cal_files):
     # filenames of the open, short, load standards
-    sol_stds = ['stds/open.S1P', 'stds/short.S1P', 'stds/load.S1P']
+    sol_stds = ['stds_Measure/open.S1P', 'stds_Measure/short.S1P', 'stds_Measure/load.S1P']
+
+
 
     # puts the reflection coefficents of the SOL standards in single array.
     # Also interpolates in frequency. See vnakit_ex/utils.py
     gamma_listed = ut.loadGammaListed(sol_stds, freq_vec_Hz)
 
     # loads S-parameter data of the thru standard, interpolates frequency
-    thru_listed = hid.readSnP('stds/thru.S2P', freq_desired=freq_vec_Hz)
+    thru_listed = hid.readSnP('stds_Measure/thru.S2P', freq_desired=freq_vec_Hz)
 
     gamma_meas_p1 = np.array(cal_files[0:3]).T
     gamma_meas_p2 = np.array(cal_files[3:6]).T
@@ -171,7 +181,7 @@ def run_measurement(settings, single_dual, tx, cal_files, ports, freq_vec_Hz, vn
     else:
         print("Wrong measurement parameter")
 
-    plot_meas(s_param_roh, s_param_8_term, s_param_12_term, freq_vec_Hz)
+    plot_meas(s_param_roh, s_param_8_term, s_param_12_term, settings, freq_vec_Hz)
 
     return s_param_roh, s_param_8_term, s_param_12_term
 

@@ -413,23 +413,23 @@ def cal_port_measure(port, DUT):
     if port == "A":
         if DUT == "Open":
             print('Measure Open Port A')
-            open_s_param_A = single_measurement(vnakit, settings, ports['Tx1'], ports)
+            open_s_param_A = single_measurement(vnakit, settings, 'Tx1', ports)
         if DUT == "Short":
             print('Measure Short Port A')
-            short_s_param_A = single_measurement(vnakit, settings, ports['Tx1'], ports)
+            short_s_param_A = single_measurement(vnakit, settings, 'Tx1', ports)
         if DUT == "Load":
             print('Measure Load Port A')
-            load_s_param_A = single_measurement(vnakit, settings, ports['Tx1'], ports)
+            load_s_param_A = single_measurement(vnakit, settings, 'Tx1', ports)
     if port == "B":
         if DUT == "Open":
             print('Measure Open Port B')
-            open_s_param_B = single_measurement(vnakit, settings, ports['Tx2'], ports)
+            open_s_param_B = single_measurement(vnakit, settings, 'Tx2', ports)
         if DUT == "Short":
             print('Measure Short Port B')
-            short_s_param_B = single_measurement(vnakit, settings, ports['Tx2'], ports)
+            short_s_param_B = single_measurement(vnakit, settings, 'Tx2', ports)
         if DUT == "Load":
             print('Measure Load Port B')
-            load_s_param_B = single_measurement(vnakit, settings, ports['Tx2'], ports)
+            load_s_param_B = single_measurement(vnakit, settings, 'Tx2', ports)
 
 
 # GUI start ------------------------------------------------------------------------------------------------------------
@@ -438,10 +438,9 @@ root = Tk()
 ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
 
 dual_or_single_port = IntVar(value=2)     # Dual ist ausgewählt
-channel_cal_method = IntVar(value=3)        # Ideale Kalibration ist ausgewählt
-
+channel_cal_method = IntVar(value=3)        # Gespeicherte Messwerte ist ausgewählt
 root.title("Network Analyzer GUI")
-x_size = 1000
+x_size = root.winfo_screenwidth()
 y_size = root.winfo_screenheight()
 root.geometry("%dx%d" % (x_size, y_size))
 
@@ -511,7 +510,7 @@ port_B_anzeige = Label(root, text="Port B", font=text_normal)
 s_meas = Radiobutton(root, text="S-Parameter wählen", font=text_normal, variable=channel_cal_method, value=2)
 s_meas.config(command=lambda: s_param_clicked())
 
-ideal_meas = Radiobutton(root, text="Ideale Kalibrierung nutzen", font=text_normal, variable=channel_cal_method,
+ideal_meas = Radiobutton(root, text="Voreingestellte Kalibrierung nutzen", font=text_normal, variable=channel_cal_method,
                          value=3)
 ideal_meas.config(command=lambda: ideal_clicked())
 
@@ -709,6 +708,7 @@ run_buttom = Button(root, text="Messung starten", font=text_normal, bg=green)
 run_buttom.config(command=lambda: run_button_clicked())
 
 insert_blank_line(root, 9, columns)
+insert_blank_line(root, 11, columns)
 
 output_folder_button = Button(root, text="Ausgabeordner wählen", font=text_normal)
 output_folder_button.config(command=lambda: output_folder_button_clicked())
