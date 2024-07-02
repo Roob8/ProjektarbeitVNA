@@ -1,0 +1,7 @@
+Frequenz: 	100 MHz - 6 GHz
+Leistung: 	-10 dBm
+RBW:		10 kHz
+Messpunkte:	5901
+
+TOSM Kalibrierung mit Cal-Kit ZV-Z235
+R&S ZVL6
