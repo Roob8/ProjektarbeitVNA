@@ -1,0 +1,97 @@
+<mxfile host="Electron" modified="2024-07-03T16:40:23.975Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.6.4 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="WN5A9khF81KBRmMtC9g5" version="24.6.4" type="device">
+  <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
+    <mxGraphModel dx="2440" dy="1408" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="2CXnayc6NnahpAtSQl0N-34" value="&lt;div style=&quot;text-align: center; font-size: 16px;&quot;&gt;&lt;span style=&quot;background-color: initial; font-size: 16px;&quot;&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Messung&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Funktionsname:&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;single_measurement / dual_measuremen&lt;span style=&quot;background-color: initial;&quot;&gt;t&lt;/span&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br style=&quot;&quot;&gt;&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Daten:&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Numpyarray mit komplexen Messwerten von jedem Port&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;fontSize=16;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="266.25" y="500" width="353.75" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="2CXnayc6NnahpAtSQl0N-47" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.499;entryY=-0.046;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=16;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="eH-cV_e9smiTX8dmG5Cn-54" edge="1" target="eH-cV_e9smiTX8dmG5Cn-55">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="442.88" y="905" as="targetPoint" />
+            <mxPoint x="442.88" y="860" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-51" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;fontSize=16;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="442.82" y="590" as="sourcePoint" />
+            <mxPoint x="442.82" y="640" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="443.07" y="610" />
+              <mxPoint x="443.07" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-56" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=16;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="eH-cV_e9smiTX8dmG5Cn-52" target="eH-cV_e9smiTX8dmG5Cn-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-52" value="&lt;div style=&quot;text-align: center; font-size: 16px;&quot;&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Kalibration&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;Funktionsname:&amp;nbsp;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;calibration_8_term/&amp;nbsp;&lt;span style=&quot;background-color: initial; font-size: 16px;&quot;&gt;calibration_12_term&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;span style=&quot;background-color: initial; font-size: 16px;&quot;&gt;&lt;br style=&quot;font-size: 16px;&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;Daten&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;Numpyarray [N, 2, 2] mit komplexen S-Parametern&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;fontSize=16;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="254.38" y="640" width="377.5" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-54" value="&lt;span style=&quot;text-wrap: nowrap; font-size: 16px;&quot;&gt;Plotten&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="383.13" y="800" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-55" value="&lt;span style=&quot;text-wrap: nowrap; font-size: 16px;&quot;&gt;Speichern&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="383.13" y="900" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-69" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="eH-cV_e9smiTX8dmG5Cn-49" target="2CXnayc6NnahpAtSQl0N-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-79" value="" style="group" vertex="1" connectable="0" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="263.13" y="310" width="360" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-70" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Kalibrationsmessung&lt;/font&gt;" style="swimlane;childLayout=stackLayout;resizeParent=1;resizeParentMax=0;startSize=20;html=1;verticalAlign=middle;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-79">
+          <mxGeometry width="360" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-71" value="Messung" style="swimlane;startSize=20;html=1;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-70">
+          <mxGeometry y="20" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-76" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Funktionsname:&lt;/font&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;cal_port_measure&lt;/font&gt;&lt;/div&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-71">
+          <mxGeometry y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-72" value="Gespeicherte" style="swimlane;startSize=20;html=1;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-70">
+          <mxGeometry x="120" y="20" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-77" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Funktionsname:&lt;/font&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;load_sparam&lt;/font&gt;&lt;/div&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-72">
+          <mxGeometry y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-73" value="Voreingestellte" style="swimlane;startSize=20;html=1;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-70">
+          <mxGeometry x="240" y="20" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-78" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Funktionsname:&lt;/font&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;get_ideal_s_param&lt;/font&gt;&lt;/div&gt;" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-73">
+          <mxGeometry y="20" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-49" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Kalibrationsdaten:&lt;/font&gt;&lt;div style=&quot;font-size: 14px;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Numpyarray mit komplexen Messwerten von jedem Port&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="eH-cV_e9smiTX8dmG5Cn-79">
+          <mxGeometry y="90" width="360" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-81" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="2CXnayc6NnahpAtSQl0N-0">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="443" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2CXnayc6NnahpAtSQl0N-0" value="Start GUI" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="393.13" y="110" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-57" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="360" y="190" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-59" value="&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;Initialisieren&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;&lt;br style=&quot;font-size: 16px;&quot;&gt;&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="text;whiteSpace=wrap;html=1;align=center;fontSize=16;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="360" y="190" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-62" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="360" y="220" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-63" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;VNAKit Objekt anlegen&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="360" y="220" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="eH-cV_e9smiTX8dmG5Cn-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=16;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="442.827037037037" y="270" as="sourcePoint" />
+            <mxPoint x="442.79" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
