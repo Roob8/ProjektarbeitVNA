@@ -18,10 +18,13 @@ global thru_s_param
 global s_param_roh
 global s_param_12_term
 global s_param_8_term
+global s_param_cor
 
 ########################################################################################################################
 
 def init_buttom_clicked():
+    # Funktion wird beim Drücken des Init. Knopfes ausgeführt und versucht die Initialsisierung des VNAKits durchzuführen
+    # durch die init. werden die voreingestelten S-Parameter der Standards geladen
     global open_s_param_A
     global short_s_param_A
     global load_s_param_A
@@ -39,8 +42,6 @@ def init_buttom_clicked():
         open_s_param_A, open_s_param_B, load_s_param_A, load_s_param_B, short_s_param_A, short_s_param_B, thru_s_param = get_ideal_s_params(
             freq_vec_Hz)
 
-        # eventuell schon beim initialisieren, die eingegebenen Werte aif Plausibilität überprüfen
-
         own_meas.grid(row=8, column=0, sticky=center)
         s_meas.grid(row=8, column=2, sticky=center)
         ideal_meas.grid(row=8, column=4, sticky=center)
@@ -54,6 +55,7 @@ def init_buttom_clicked():
         init_button.config(bg=red)
 
 def own_meas_clicked():
+    # Funktion wird beim Drücken des Knopfes "Eigene Messung starten" ausgeführt
     global choosen_single_port_global
 
     choosen_single_port = get_choosen_single_port(portlist)
@@ -121,6 +123,7 @@ def own_meas_clicked():
 
 
 def s_param_clicked():
+    # Funktion wird beim Drücken des Knopfes "S-Parameter wählen" ausgeführt
     choosen_single_port = get_choosen_single_port(portlist)
 
     if dual_or_single_port.get() == 1:
@@ -144,6 +147,7 @@ def s_param_clicked():
 
 
 def ideal_clicked():
+    # Funktion wird beim Drücken des Knopfes "Voreingestellte Kalibrierung nutzen" ausgeführt
     dual_port_frame_own.grid_remove()
     single_port_frame_own.grid_remove()
     dual_port_frame_s.grid_remove()
@@ -205,9 +209,11 @@ def ideal_clicked():
 
 
 def run_button_clicked():
+    # Funktion wird beim Drücken des Knopfes "Messung starten" ausgeführt
     global s_param_roh
     global s_param_8_term
     global s_param_12_term
+    global s_param_cor
     global open_s_param_A
     global short_s_param_A
     global load_s_param_A
@@ -215,6 +221,7 @@ def run_button_clicked():
     global short_s_param_B
     global load_s_param_B
     global thru_s_param
+    global dual_or_single
 
     output_folder_button.grid(row=12, column=1, sticky=center)
     output_folder_output.grid(row=12, column=2, sticky=center)
@@ -235,10 +242,19 @@ def run_button_clicked():
         tx = "Tx1"
     elif choosen_single_port == "B":
         tx = "Tx2"
+    else:
+        print("Error! No TX-Port selected")
 
-    s_param_roh, s_param_8_term, s_param_12_term = run_measurement(settings, dual_or_single, tx, cal_files, ports, freq_vec_Hz, vnakit)
+    if dual_or_single == 2:
+        s_param_roh, s_param_8_term, s_param_12_term = run_measurement_dual(settings, cal_files, ports, freq_vec_Hz, vnakit)
+    elif dual_or_single == 1:
+        s_param_roh, s_param_cor = run_measurement_single_port(settings, tx, cal_files, ports, freq_vec_Hz, vnakit)
+    else:
+        print("Error! No single or dual measurement selected")
+
 
 def output_folder_button_clicked():
+    # Funktion wird beim Drücken des Knopfes "Ablageordner wählen" ausgeführt
     global folder_path
 
     folder_path = filedialog.askdirectory()
@@ -249,19 +265,27 @@ def output_folder_button_clicked():
 
 
 def save_button_clicked():
+    # Funktion wird beim Drücken des Knopfes "Save" ausgeführt
     global s_param_roh
     global s_param_8_term
     global s_param_12_term
     global folder_path
+    global dual_or_single
 
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     settings = get_settings(start_freq_input, end_freq_input, nop_input, rbw_input, power_input, vnakit)
     dual_or_single = dual_or_single_port.get()
 
     file_name = name_input.get()
-    save_measurements(settings, freq_vec_Hz, s_param_roh, s_param_8_term, s_param_12_term, folder_path, file_name, dual_or_single, vnakit)
 
+    if dual_or_single == 2:
+        save_measurements_dual(settings, freq_vec_Hz, s_param_roh, s_param_8_term, s_param_12_term, folder_path, file_name, vnakit)
+    elif dual_or_single == 1:
+        save_measurements_single(settings, freq_vec_Hz, s_param_roh, s_param_cor, folder_path, file_name, vnakit)
+    else:
+        print("Error! No logic value for single_dual: " + dual_or_single)
 def get_path_open():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global open_s_param_A
     global open_s_param_B
 
@@ -282,6 +306,7 @@ def get_path_open():
         print("done")
 
 def get_path_short():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global short_s_param_A
     global short_s_param_B
 
@@ -299,8 +324,8 @@ def get_path_short():
     elif choosen_single_port == "B":
         short_s_param_B = load_sparam(freq_vec_Hz, path_short)
 
-
 def get_path_load():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global load_s_param_A
     global load_s_param_B
 
@@ -318,8 +343,8 @@ def get_path_load():
     elif choosen_single_port == "B":
         load_s_param_B = load_sparam(freq_vec_Hz, path_load)
 
-
 def get_path_open_A():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global open_s_param_A
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     path_open_A = filedialog.askopenfilename()
@@ -329,8 +354,8 @@ def get_path_open_A():
     path_open_A_output.config(state="disabled")
     open_s_param_A = load_sparam(freq_vec_Hz, path_open_A)
 
-
 def get_path_short_A():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global short_s_param_A
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     path_short_A = filedialog.askopenfilename()
@@ -340,8 +365,8 @@ def get_path_short_A():
     path_short_A_output.config(state="disabled")
     short_s_param_A = load_sparam(freq_vec_Hz, path_short_A)
 
-
 def get_path_load_A():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global load_s_param_A
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     path_load_A = filedialog.askopenfilename()
@@ -351,8 +376,8 @@ def get_path_load_A():
     path_load_A_output.config(state="disabled")
     load_s_param_A = load_sparam(freq_vec_Hz, path_load_A)
 
-
 def get_path_open_B():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global open_s_param_B
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     path_open_B = filedialog.askopenfilename()
@@ -362,8 +387,8 @@ def get_path_open_B():
     path_open_B_output.config(state="disabled")
     open_s_param_B = load_sparam(freq_vec_Hz, path_open_B)
 
-
 def get_path_short_B():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global short_s_param_B
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     path_short_B = filedialog.askopenfilename()
@@ -373,8 +398,8 @@ def get_path_short_B():
     path_short_B_output.config(state="disabled")
     short_s_param_B = load_sparam(freq_vec_Hz, path_short_B)
 
-
 def get_path_load_B():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global load_s_param_B
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     path_load_B = filedialog.askopenfilename()
@@ -384,8 +409,8 @@ def get_path_load_B():
     path_load_B_output.config(state="disabled")
     load_s_param_B = load_sparam(freq_vec_Hz, path_load_B)
 
-
 def get_path_thru():
+    # Funktion öffnet Eingabefeld, in welchem die entsprechenden S-Parameter ausgewählt werden sollen
     global thru_s_param
     freq_vec_Hz = get_frequency_vector(start_freq_input, end_freq_input, nop_input)
     path_thru = filedialog.askopenfilename()
@@ -395,8 +420,12 @@ def get_path_thru():
     path_thru_output.config(state="disabled")
     thru_s_param = load_sparam(freq_vec_Hz, path_thru)
 
-
 def cal_port_measure(port, DUT):
+    '''
+    Eingangsparamter:   port -- Input als string um welchen Port es sich handelt
+                        DUT -- Input als string um welchen Standard es sich handelt
+    Funktion schreibt in entsprechende Variable das Messergebnis einer One- oder Two-Port Messung
+    '''
     global open_s_param_A
     global short_s_param_A
     global load_s_param_A
@@ -433,6 +462,7 @@ def cal_port_measure(port, DUT):
 
 
 # GUI start ------------------------------------------------------------------------------------------------------------
+# Initialisierung dr GUI
 columns = 5
 root = Tk()
 ports = {'Tx1': 6, 'Rx1A': 5, 'Rx1B': 4, 'Tx2': 3, 'Rx2A': 2, 'Rx2B': 1}
@@ -448,11 +478,13 @@ root.geometry("%dx%d" % (x_size, y_size))
 for i in range(columns):
     root.columnconfigure(i, weight=1)
 
+# Überschrift
 headline = Label(root, text="Grafische Umgebung für die Verwendung des UVNA-63", font=header_bold_underline)
 headline.grid(row=0, column=0, columnspan=columns, sticky=center)
 
 insert_blank_line(root, 1, columns)
 
+# Eingabeblock
 start_freq_text = Label(root, text="Startfrequenz in MHz", font=text_normal)
 start_freq_text.grid(row=2, column=0, sticky=center)
 
@@ -502,6 +534,7 @@ dual_port_check.grid(row=4, column=4, sticky=center)
 
 insert_blank_line(root, 5, columns)
 
+# Kalibrationsmöglichkeiten
 own_meas = Radiobutton(root, text="Eigene Messung Starten", font=text_normal, variable=channel_cal_method, value=1)
 own_meas.config(command=lambda: own_meas_clicked())
 port_A_anzeige = Label(root, text="Port A", font=text_normal)
@@ -516,7 +549,7 @@ ideal_meas.config(command=lambda: ideal_clicked())
 
 
 ########################################################################################################################
-
+# Fenster welche sich nach "Eigene Messung Starten" öffnen
 single_port_frame_own = Frame(root)
 for i in range(columns):
     single_port_frame_own.columnconfigure(i, weight=1)
@@ -567,6 +600,7 @@ thru_meas.config(command=lambda: cal_port_measure("AB", "Thru"))
 thru_meas.grid(row=3, column=0, columnspan=2, sticky=center)
 
 ########################################################################################################################
+# Fenster welche sich nach "S-Parameter wählen" öffnen
 single_port_frame_s = Frame(root)
 
 for i in range(columns):
@@ -697,7 +731,7 @@ scrollbar_thru.grid(row=7, column=1, sticky=center)
 path_thru_output.config(xscrollcommand=scrollbar_thru.set)
 
 ########################################################################################################################
-
+# Init. / Messung starten / Messwertspeicherung
 insert_blank_line(root, 7, columns)
 
 init_button = Button(root, text="INIT.", font=text_normal, bg=red)
